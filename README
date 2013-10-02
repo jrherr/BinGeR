@@ -1,0 +1,78 @@
+BinGeR 
+version: 0.0.1
+author: Chengwei Luo
+==========================
+
+BinGeR: in-situ Genome recovery tool for series metagenomes
+
+BinGeR (Binner for Genome Recovery) is a platform for de novo genome recovery from series metagenomes. It integrates information from single copy gene content, contig coverage correlation, and contig oligo-nucleotide composition correlation, and contig alignments to bin genome fragments together. It is written in Python, therefore it should run on Windows, Mac OS, and Unix/Linux.
+
+Reference: [manuscript in preparation]
+
+Copyright: Chengwei Luo, Konstantinidis Lab, Georgia Institute of Technology, 2013
+
+Contact: Chengwei Luo (Email: luo.chengwei@gatech.edu)
+
+How to install
+==========================
+Dependencies:
+
+Python >= 2.6
+BLAT 
+
+Python libraries:
+
+NetworkX >= 1.7 
+Pysam >= 0.6
+Numpy >= 1.5.1
+Scipy >= 0.12.0
+BioPython >= 1.58
+scikit-learn >= 0.14
+
+Packages with other versions might work, but not tested. You can certainly manually install all of the packages, however, I recommend using Anaconda, which is a Python distribution for big data processing, it bundles many packages for data scientists. For more information, go to:
+
+https://store.continuum.io/cshop/anaconda/
+
+To install, unzip/untar/uncompress the BinGeR package, and in terminal cd to the unpacked directory, and run:
+
+$ python setup.py install
+
+You can alway supply --prefix to alter the installation directory:
+
+$ python setup.py install --prefix = user/defined/installation/directory
+
+If you have everything ready, this should take care of the installation.
+
+How to run
+==========================
+After running setup.py, you may want to either open a new tab in the terminal, or in current terminal tab:
+$ source ~/.profile
+
+In terminal, as simple as:
+$ BinGeR.py -l <sample.txt> -o <output_dir> [options]
+
+For more detailed settings, please type:
+
+$ BinGeR.py --help
+
+This should print out a detailed settings for you.
+
+Contents of db folder
+==========================
+In db/, you will find a few db files:
+HMM.txt
+ncbiNodes.lib
+ncbiSciNames.lib
+
+
+Contents of utils folder
+==========================
+In utils/, you will see a few Python scripts, as listed below:
+
+bamCoverage.py
+oligoNtZScore.py
+runHMMScan.py
+interleaveReads.py
+renameContigs.py
+
+They are utility scripts that will assist you in preparing the input files necessary for BinGeR.
