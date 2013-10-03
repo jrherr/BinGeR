@@ -30,6 +30,8 @@ import sys
 import os
 import re
 import glob
+import tarfile
+import shutil
 from subprocess import Popen, PIPE, call
 import multiprocessing as mp
 import cPickle
@@ -902,12 +904,49 @@ class ContigSpace(nx.Graph):
 		tTree = TaxonTree()
 		tTree.loadTreeFromNodeLib(projInfo.DBs['ncbiNodes'], projInfo.DBs['ncbiSciNames'])
 		
+		# extract db files to out_dir
+		try:
+			nucTar = tarfile.open(projInfo.DBs['nuc'], 'r')
+			protTar = tarfile.open(projInfo.DBs['prot'], 'r')
+		except:
+			sys.stderr.write('FATAL: failure in opening tarfile.\n')
+			exit(0)
+		
+		try:
+			nucTar.extractall(path = projInfo.out_dir)
+		except:		
+			sys.stderr.write('FATAL: failure in extracting single copy genes nucleotide sequences.\n')
+			exit(0)
+			
+		try:
+			protTar.extractall(path = projInfo.out_dir)
+		except:		
+			sys.stderr.write('FATAL: failure in extracting single copy genes protein sequences.\n')
+			exit(0)
+		
+		# create merged files
+		catNuc = open(projInfo.out_dir + '/genes.nuc.clustered/allGenes.fasta', 'w')
+		catProt = open(projInfo.out_dir + '/genes.prot.clustered/allGenes.fasta', 'w')
+		
+		for file in glob.glob(projInfo.out_dir + '/genes.nuc.clustered/*.fa'):
+			shutil.copyfileobj(open(file, 'rb'), catNuc)
+		catNuc.close()
+		
+		for file in glob.glob(projInfo.out_dir + '/genes.prot.clustered/*.fa'):
+			shutil.copyfileobj(open(file, 'rb'), catProt)
+		catProt.close()
+		
+		# go through each initCore and refine them.
 		for initCore in initCores:
 			# run personalized PageRank here to find the best clustering
 			sys.stdout.write('Running personalized PageRank algorithms now.\n')
+			# get the taxonomy affiliation
 			nodePhylo = phylo.nodePhylo(initCore, tTree, projInfo, options)
+			# refine the graph using community PageRank
 			refinedCoreGraph = commPageRank(initCore, nodePhylo, options)
+			
 			# output to self.cores
+			# need to output taxonomy affiliation as well.
 			for core in nx.connected_components(refinedCoreGraph):
 				coreID += 1
 				self.cores[coreID] = []
@@ -926,7 +965,17 @@ class ContigSpace(nx.Graph):
 		
 		if not options.quiet:
 			sys.stdout.write('Done.\n')
-	
+
+		# clean up the directory
+		try:
+			shutil.rmtree(projInfo.out_dir + '/genes.nuc.clustered/')
+		except:
+			sys.stderr.write('WARNING: Failure in removing intermediate nucleotide sequences directory.\n')
+			
+		try:
+			shutil.rmtree(projInfo.out_dir + '/genes.prot.clustered/')
+		except:
+			sys.stderr.write('WARNING: Failure in removing intermediate protein sequences directory.\n')	
 	# End of refineCores
 
 

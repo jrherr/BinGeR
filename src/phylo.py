@@ -26,7 +26,163 @@ for help, type:
 python BinGeR.py --help
 """
 
+import sys
+import os
+import re
+from string import maketrans
+from operator import itemgetter
+import time
+from Bio import SeqIO, Seq
+from subprocess import call
+
 def nodePhylo(G, tTree, projInfo, options):
-	phylo = {}
-	sys.stdout.write('code under construction\n')
+	nuc_dir = projInfo.out_dir + '/genes.nuc.clustered/'
+	prot_dir = projInfo.out_dir + '/genes.prot.clustered/'
+	trans = maketrans('ACGTacgt', 'TGCAtgca')
+	
+	# create lookup table for hmmscan contigs
+	hmm_dict = {}
+	for geneName in projInfo.HMM:
+		for tag in projInfo.HMM[geneName]:
+			hmm_dict[tag] = geneName
+
+	nodes = {}
+	for node in G.nodes(data = True):
+		if 'HMM' not in node[1]:
+			continue
+		contigID = node[0]
+		sample = node[1]['sample']
+		if sample not in nodes:
+			nodes[sample] = []
+		nodes[sample].append(node)
+		
+	# holds all involved sequences
+	sequences = {}
+	for sample in projInfo.samples:
+		assembly = projInfo.getAssemblyFile(sample)
+		if sample not in nodes:
+			continue
+		sequences[sample] = {}
+		afh = open(assembly, 'r')
+		contigDict = SeqIO.to_dict(SeqIO.parse(afh, "fasta"))
+		for node in nodes[sample]:
+			record = contigDict[node[0]]
+			seq = record.seq
+			sequences[sample][node[0]] = seq
+		afh.close()	
+	
+	# extract genes.
+	candidateSeqs = []
+	for sample in nodes:
+		for node in nodes[sample]:
+			contigID = node[0]
+			for gene in node[1]['HMM']:
+				tag = gene[0]
+				start, end = re.search('(\d+)\-(\d+)', gene[1]).group(1,2)
+				start = int(start)
+				end = int(end)
+				strand = gene[2]
+				geneName = hmm_dict[gene[0]]
+				geneSeq = sequences[sample][contigID][start-1:end]
+				
+				if strand != '1':
+					geneSeq = str(geneSeq[::-1]).translate(trans)
+				else:
+					geneSeq = str(geneSeq)
+				
+				newTag = contigID+'|'+gene[1]+'|'+strand+'|'+geneName
+				protSeq = Seq.Seq(geneSeq).translate()
+				
+				candidateSeqs.append((newTag, protSeq))
+	
+	# write to temp fasta file
+	tempfasta = projInfo.out_dir + '/' + str(time.time()) + '.fa' 
+	writeTempFasta(tempfasta, candidateSeqs)
+	
+	# run blat
+	blatfile = tempfasta.replace('fa', 'blat')
+	logfile = tempfasta.replace('fa', 'log')
+	database = projInfo.out_dir + '/genes.prot.clustered/allGenes.fasta'
+	runBLAT(tempfasta, database, blatfile, logfile, options.blat)
+	
+	# dict with contig->taxonomy mapping
+	# interpret the results
+	phylo = estimatePhylo(blatfile, tTree, projInfo)
+	
+	# cleanup
+#	os.remove(blatfile)
+#	os.remove(logfile)
+#	os.remove(tempfasta)
+
+	return phylo
+	
+# End of nodePhylo
+
+def writeTempFasta(outfile, seqs):
+	try:
+		ofh = open(outfile, 'wb')
+	except OSError:
+		sys.stderr.write('FATAL: Cannot create temporary fasta file.\n')
+	
+	for seq in seqs:
+		ofh.write('>'+seq[0]+'\n'+str(seq[1])+'\n')
+	
+	ofh.close()
+	
+# End of writeTempFasta
+
+def runBLAT(query, db, outfile, logfile, blat):
+	cmd = [blat, db, query, "-prot", "-out=blast8", "-noHead", outfile, logfile]
+	try:
+		retcode = call(cmd[:-1], stdout = open(cmd[-1],'a'))
+	except OSError:
+		sys.stderr.write( "OSError: fatal error running blat.\n" )
+		exit(0)
+	except ValueError:
+		sys.stderr.write( "ValueError: fatal error running blat.\n" )
+		exit(0)
+# End of runBLAT
+
+def estimatePhylo(blatfile, tTree, projInfo):
+	## churn the blat file and pick the top 5 hits
+	bfh = open(blatfile, 'r')
+	blatRes = {}
+	while 1:
+		line = bfh.readline().rstrip('\n')
+		if not line:
+			break
+		cols = line.split('\t')
+		contig, start, end, strand, gene = re.search('(.+)\|(\d+)\-(\d+)\|(.+)\|(.+)$', cols[0]).group(1, 2, 3, 4, 5)
+		taxid = re.search('(\d+)\.', cols[1]).group(1)
+		start = int(start)
+		end = int(start)
+		geneLength = (end - start)/3
+		identity = float(cols[2])
+		percentageCov = float(geneLength)/int(cols[3])
+		bitscore = float(cols[-1])
+		
+		if contig not in blatRes:
+			blatRes[contig] = {}
+		if gene not in blatRes[contig]:
+			blatRes[contig][gene] = []
+			
+		if len(blatRes[contig][gene]) < 5:
+			blatRes[contig][gene].append((taxid, percentageCov, identity, bitscore))
+		else:
+			bitscores = map(itemgetter(-1), blatRes[contig][gene])
+			minScore = min(bitscores)
+			if bitscore > minScore:
+				# remove the lowest scored one.
+				index = bitscores(minScore)
+				blatRes[contig][gene].pop([index])
+				blatRes[contig][gene].append((taxid, percentageCov, identity, bitscore))
+			
+	bfh.close()
+	
+	print blatRes
+	
+	## perform LCA here.
+	
+	print 'Construction site'
+# End of estimatePhylo
 	

@@ -228,35 +228,6 @@ class ProjectInfo:
 			return HMMScanFiles[0]
 			
 	def initProject(self, options):
-		# check if db/ has every file needed.
-		sys.stdout.write("Checking db files...\n")
-		db_dir = os.path.abspath(sys.argv[0]).replace('bin/BinGeR.py', 'db/')
-		dbs = ['HMM.txt', 'ncbiNodes.lib','ncbiSciNames.lib', 
-				'singleCopy.prot.fa', 'singleCopy.nuc.fa']
-		dbFiles = [db_dir + filename for filename in dbs]
-		for dbFile in dbFiles:
-			if not os.path.exists(dbFile):
-				sys.stderr.write('FATAL: Cannot locate db file: %s\n' % dbFile)
-				exit(0)
-		
-		self.DBs['HMM'] = dbFiles[0]
-		self.DBs['ncbiNodes'] = dbFiles[1]
-		self.DBs['ncbiSciNames'] = dbFiles[2]
-		sys.stdout.write("Done. Everything looks fine.\n")
-		
-		
-		# check db/HMM.txt and load it to self.HMM
-		sys.stdout.write("Loading HMMFams...\n")
-		hmmFile = self.DBs['HMM']
-		if not os.path.exists(hmmFile):
-			sys.stderr.write("FATAL: cannot locate db/HMM.txt, abort BinGeR.\n")
-			exit(0)
-		
-		hmmfh = open(hmmFile, 'rb')
-		self.HMM = cPickle.load(hmmfh)
-		hmmfh.close()
-		sys.stdout.write('HMMFams loaded.\n')
-		
 		sys.stdout.write("Fetching information for this BinGeR project...\n")
 
 		# Reads the sample list and check if every required file is in place
@@ -290,6 +261,38 @@ class ProjectInfo:
 				coverageFile = self.getCoverageFile(sampleA, sampleB)
 				
 		sys.stdout.write("Done fetching information!\n")
+		
+	
+		# check if db/ has every file needed.
+		sys.stdout.write("Checking db files...\n")
+		db_dir = os.path.abspath(sys.argv[0]).replace('bin/BinGeR.py', 'db/')
+		dbs = ['HMM.txt', 'ncbiNodes.lib','ncbiSciNames.lib', 
+				'singleCopy.prot.tar.gz', 'singleCopy.nuc.tar.gz']
+		dbFiles = [db_dir + filename for filename in dbs]
+		for dbFile in dbFiles:
+			if not os.path.exists(dbFile):
+				sys.stderr.write('FATAL: Cannot locate db file: %s\n' % dbFile)
+				exit(0)
+		
+		self.DBs['HMM'] = dbFiles[0]
+		self.DBs['ncbiNodes'] = dbFiles[1]
+		self.DBs['ncbiSciNames'] = dbFiles[2]
+		self.DBs['nuc'] = dbFiles[3]
+		self.DBs['prot'] = dbFiles[4]
+		sys.stdout.write("Done. Everything looks fine.\n")
+		
+		
+		# check db/HMM.txt and load it to self.HMM
+		sys.stdout.write("Loading HMMFams...\n")
+		hmmFile = self.DBs['HMM']
+		if not os.path.exists(hmmFile):
+			sys.stderr.write("FATAL: cannot locate db/HMM.txt, abort BinGeR.\n")
+			exit(0)
+		
+		hmmfh = open(hmmFile, 'rb')
+		self.HMM = cPickle.load(hmmfh)
+		hmmfh.close()
+		sys.stdout.write('HMMFams loaded.\n')
 		
 # end of class ProjectInfo
 

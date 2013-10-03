@@ -29,6 +29,7 @@ python BinGeR.py --help
 import sys
 import re
 import os
+import numpy as np
 
 def commPageRank(initCore, nodePhylo, options):
 	
