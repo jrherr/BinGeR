@@ -37,7 +37,8 @@ setup(
 				'src/commPageRank.py', 'src/taxonomy.py',
 				'src/utilities.py', 'src/phylo.py'],
 	
-	data_files = [('db', ['db/HMM.txt', 'db/ncbiNodes.lib', 'db/ncbiSciNames.lib'])],
+	data_files = [('db', ['db/HMM.txt', 'db/ncbiNodes.lib', 'db/ncbiSciNames.lib',
+						'db/singleCopy.nuc.tar.gz', 'db/singleCopy.prot.tar.gz'])],
 	
 	author="Chengwei Luo",
     author_email="luo.chengwei@gatech.edu",
