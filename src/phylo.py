@@ -56,6 +56,8 @@ def nodePhylo(index, G, tTree, projInfo, options):
 		nodes[sample].append(node)
 		
 	# holds all involved sequences
+	if not options.quiet:
+		sys.stdout.write('Now extracting core genes...\n')
 	sequences = {}
 	for sample in projInfo.samples:
 		assembly = projInfo.getAssemblyFile(sample)
@@ -93,6 +95,9 @@ def nodePhylo(index, G, tTree, projInfo, options):
 				protSeq = Seq.Seq(geneSeq).translate()
 				
 				candidateSeqs.append((newTag, protSeq))
+				
+	if not options.quiet:
+		sys.stdout.write('Done.\n')
 	
 	# write to temp fasta file
 	tempfasta = projInfo.out_dir + '/initCores/initCore.' + str(index + 1) + '.fa'
@@ -111,15 +116,19 @@ def nodePhylo(index, G, tTree, projInfo, options):
 	if os.path.exists(blatfile):
 		pass
 	else:
-		sys.stdout.write('run blat.\n')
+		if not options.quiet:
+			sys.stdout.write('Running blat.\n')
 		runBLAT(tempfasta, database, blatfile, logfile, options.blat)
-		sys.stdout.write('Done.\n')
+		if not options.quiet:
+			sys.stdout.write('Done.\n')
 	
 	# dict with contig->taxonomy mapping
 	# interpret the results
-	sys.stdout.write('rendering result.\n')
+	if not options.quiet:
+		sys.stdout.write('Rendering result.\n')
 	phylo = structPhylo(blatfile, tTree, projInfo)
-	
+	if not options.quiet:
+		sys.stdout.write('Done.\n')
 	# cleanup
 #	os.remove(blatfile)
 #	os.remove(logfile)
