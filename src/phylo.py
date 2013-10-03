@@ -155,10 +155,10 @@ def estimatePhylo(blatfile, tTree, projInfo):
 		contig, start, end, strand, gene = re.search('(.+)\|(\d+)\-(\d+)\|(.+)\|(.+)$', cols[0]).group(1, 2, 3, 4, 5)
 		taxid = re.search('(\d+)\.', cols[1]).group(1)
 		start = int(start)
-		end = int(start)
-		geneLength = (end - start)/3
+		end = int(end)
+		geneLength = float(end - start + 1)/3
 		identity = float(cols[2])
-		percentageCov = float(geneLength)/int(cols[3])
+		percentageCov = geneLength/int(cols[3])
 		bitscore = float(cols[-1])
 		
 		if contig not in blatRes:
@@ -173,8 +173,8 @@ def estimatePhylo(blatfile, tTree, projInfo):
 			minScore = min(bitscores)
 			if bitscore > minScore:
 				# remove the lowest scored one.
-				index = bitscores(minScore)
-				blatRes[contig][gene].pop([index])
+				index = bitscores.index(minScore)
+				blatRes[contig][gene].pop(index)
 				blatRes[contig][gene].append((taxid, percentageCov, identity, bitscore))
 			
 	bfh.close()
