@@ -31,11 +31,10 @@ import os
 import re
 from string import maketrans
 from operator import itemgetter
-import time
 from Bio import SeqIO, Seq
 from subprocess import call
 
-def nodePhylo(G, tTree, projInfo, options):
+def nodePhylo(index, G, tTree, projInfo, options):
 	nuc_dir = projInfo.out_dir + '/genes.nuc.clustered/'
 	prot_dir = projInfo.out_dir + '/genes.prot.clustered/'
 	trans = maketrans('ACGTacgt', 'TGCAtgca')
@@ -96,18 +95,30 @@ def nodePhylo(G, tTree, projInfo, options):
 				candidateSeqs.append((newTag, protSeq))
 	
 	# write to temp fasta file
-	tempfasta = projInfo.out_dir + '/' + str(time.time()) + '.fa' 
-	writeTempFasta(tempfasta, candidateSeqs)
+	tempfasta = projInfo.out_dir + '/initCores/' + str(index) + '.fa'
+	if os.path.exists(tempfasta):
+		pass
+	else:
+		sys.stdout.write('Writing fasta\n')
+		writeTempFasta(tempfasta, candidateSeqs)
+		sys.stdout.write('Done.\n')
 	
 	# run blat
 	blatfile = tempfasta.replace('fa', 'blat')
 	logfile = tempfasta.replace('fa', 'log')
 	database = projInfo.out_dir + '/genes.prot.clustered/allGenes.fasta'
-	runBLAT(tempfasta, database, blatfile, logfile, options.blat)
+	
+	if os.path.exists(blatfile):
+		pass
+	else:
+		sys.stdout.write('run blat.\n')
+		runBLAT(tempfasta, database, blatfile, logfile, options.blat)
+		sys.stdout.write('Done.\n')
 	
 	# dict with contig->taxonomy mapping
 	# interpret the results
-	phylo = estimatePhylo(blatfile, tTree, projInfo)
+	sys.stdout.write('rendering result.\n')
+	phylo = structPhylo(blatfile, tTree, projInfo)
 	
 	# cleanup
 #	os.remove(blatfile)
@@ -143,7 +154,7 @@ def runBLAT(query, db, outfile, logfile, blat):
 		exit(0)
 # End of runBLAT
 
-def estimatePhylo(blatfile, tTree, projInfo):
+def structPhylo(blatfile, tTree, projInfo):
 	## churn the blat file and pick the top 5 hits
 	bfh = open(blatfile, 'r')
 	blatRes = {}
@@ -153,12 +164,12 @@ def estimatePhylo(blatfile, tTree, projInfo):
 			break
 		cols = line.split('\t')
 		contig, start, end, strand, gene = re.search('(.+)\|(\d+)\-(\d+)\|(.+)\|(.+)$', cols[0]).group(1, 2, 3, 4, 5)
-		taxid = re.search('(\d+)\.', cols[1]).group(1)
+		taxid = int(re.search('(\d+)\.', cols[1]).group(1))
 		start = int(start)
 		end = int(end)
 		geneLength = float(end - start + 1)/3
 		identity = float(cols[2])
-		percentageCov = geneLength/int(cols[3])
+		percentageCov = float(cols[3])/geneLength
 		bitscore = float(cols[-1])
 		
 		if contig not in blatRes:
@@ -176,10 +187,14 @@ def estimatePhylo(blatfile, tTree, projInfo):
 				index = bitscores.index(minScore)
 				blatRes[contig][gene].pop(index)
 				blatRes[contig][gene].append((taxid, percentageCov, identity, bitscore))
-			
 	bfh.close()
 	
-	print blatRes
+	phylos = []
+	for contig in blatRes:
+		for gene in blatRes[contig]:
+			for hit in blatRes[contig][gene]:
+				taxid = hit[0]
+				taxonIDs, Ranks, sciNames = tTree.getTaxonomyPath(taxid)
 	
 	## perform LCA here.
 	

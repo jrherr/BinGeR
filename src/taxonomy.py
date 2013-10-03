@@ -36,7 +36,7 @@ class TaxonNode:
 		self.commName = None
 	
 	def isRoot(self):
-		if self.taxonID <= 1:
+		if self.taxonID > 1:
 			return False
 		return True	
 
@@ -96,8 +96,11 @@ class TaxonTree:
 		taxonIDs = []
 		Ranks = []
 		sciNames = []
-		currentNode = self.nodes[nodeID]
-		
+		try:
+			currentNode = self.nodes[nodeID]
+		except:
+			return taxonIDs, Ranks, sciNames
+			
 		while (not currentNode.isRoot()):
 			taxonIDs.append(currentNode.taxonID)
 			Ranks.append(currentNode.rank)

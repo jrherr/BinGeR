@@ -901,10 +901,16 @@ class ContigSpace(nx.Graph):
 		
 		# go through each initCore and apply community PageRank
 		coreID = 0
+		if not options.quiet:
+			sys.stdout.write('Now loading taxonomy treee...\n')
 		tTree = TaxonTree()
 		tTree.loadTreeFromNodeLib(projInfo.DBs['ncbiNodes'], projInfo.DBs['ncbiSciNames'])
+		if not options.quiet:
+			sys.stdout.write('Done.\n')
 		
 		# extract db files to out_dir
+		if not options.quiet:
+			sys.stdout.write('Now preparing single copy genes...\n')
 		try:
 			nucTar = tarfile.open(projInfo.DBs['nuc'], 'r')
 			protTar = tarfile.open(projInfo.DBs['prot'], 'r')
@@ -936,12 +942,18 @@ class ContigSpace(nx.Graph):
 			shutil.copyfileobj(open(file, 'rb'), catProt)
 		catProt.close()
 		
+		if not options.quiet:
+			sys.stdout.write('Done.\n')
+			
 		# go through each initCore and refine them.
-		for initCore in initCores:
+		for coreIndex, initCore in enumerate(initCores):
 			# run personalized PageRank here to find the best clustering
 			sys.stdout.write('Running personalized PageRank algorithms now.\n')
+			
 			# get the taxonomy affiliation
-			nodePhylo = phylo.nodePhylo(initCore, tTree, projInfo, options)
+			nodePhylo = phylo.nodePhylo(coreIndex, initCore, tTree, projInfo, options)
+			continue
+			
 			# refine the graph using community PageRank
 			refinedCoreGraph = commPageRank(initCore, nodePhylo, options)
 			
@@ -955,6 +967,8 @@ class ContigSpace(nx.Graph):
 	
 				if not options.quiet:
 					sys.stdout.write('Core - %i has %i nodes \n'%(coreID, len(core)))
+		
+		return
 		
 		# clean up self.graphs to release RAM
 		for clusterName in self.graphs:
