@@ -95,7 +95,7 @@ def nodePhylo(index, G, tTree, projInfo, options):
 				candidateSeqs.append((newTag, protSeq))
 	
 	# write to temp fasta file
-	tempfasta = projInfo.out_dir + '/initCores/' + str(index) + '.fa'
+	tempfasta = projInfo.out_dir + '/initCores/initCore.' + str(index + 1) + '.fa'
 	if os.path.exists(tempfasta):
 		pass
 	else:
