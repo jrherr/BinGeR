@@ -144,7 +144,7 @@ class ProjectInfo:
 	
 		# check if db/ has every file needed.
 		sys.stdout.write("Checking db files...\n")
-		db_dir = os.path.abspath(sys.argv[0]).replace('test.py', 'db/')
+		db_dir = os.path.abspath(sys.argv[0]).replace('test/test.py', 'db/')
 		dbs = ['HMM.txt', 'ncbiNodes.lib','ncbiSciNames.lib', 
 				'singleCopy.prot.tar.gz', 'singleCopy.nuc.tar.gz']
 		dbFiles = [db_dir + filename for filename in dbs]
