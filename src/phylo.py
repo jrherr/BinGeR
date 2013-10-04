@@ -219,7 +219,7 @@ def structPhylo(blatfile, tTree, projInfo):
 			
 		if len(blatRes[contig][gene]) < 3:
 			blatRes[contig][gene].append((taxid, percentageCov, identity, bitscore))
-		else:
+		elif len(blatRes[contig][gene]) == 3:
 			bitscores = map(itemgetter(-1), blatRes[contig][gene])
 			minScore = min(bitscores)
 			if bitscore > minScore:
@@ -236,6 +236,7 @@ def structPhylo(blatfile, tTree, projInfo):
 				taxid = hit[0]
 				taxonIDs, Ranks, sciNames = tTree.getTaxonomyPath(taxid)
 				temp.append(taxonIDs)
+			print len(temp)
 			for index, taxonIDs in temp:
 				blatRes[contig][gene].insert(index*2, taxonIDs)
 	

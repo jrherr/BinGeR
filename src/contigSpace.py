@@ -902,7 +902,7 @@ class ContigSpace(nx.Graph):
 		# go through each initCore and apply community PageRank
 		coreID = 0
 		if not options.quiet:
-			sys.stdout.write('Now loading taxonomy treee...\n')
+			sys.stdout.write('Now loading taxonomy tree...\n')
 		tTree = TaxonTree()
 		tTree.loadTreeFromNodeLib(projInfo.DBs['ncbiNodes'], projInfo.DBs['ncbiSciNames'])
 		if not options.quiet:
