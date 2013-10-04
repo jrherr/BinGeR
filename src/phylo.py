@@ -61,52 +61,50 @@ def nodePhylo(index, G, tTree, projInfo, options):
 	# holds all involved sequences
 	if not options.quiet:
 		sys.stdout.write('Now extracting core genes...\n')
-	sequences = {}
-	for sample in projInfo.samples:
-		assembly = projInfo.getAssemblyFile(sample)
-		if sample not in nodes:
-			continue
-		sequences[sample] = {}
-		afh = open(assembly, 'r')
-		contigDict = SeqIO.to_dict(SeqIO.parse(afh, "fasta"))
-		for node in nodes[sample]:
-			record = contigDict[node[0]]
-			seq = record.seq
-			sequences[sample][node[0]] = seq
-		afh.close()	
-	
-	# extract genes.
-	candidateSeqs = []
-	for sample in nodes:
-		for node in nodes[sample]:
-			contigID = node[0]
-			for gene in node[1]['HMM']:
-				tag = gene[0]
-				start, end = re.search('(\d+)\-(\d+)', gene[1]).group(1,2)
-				start = int(start)
-				end = int(end)
-				strand = gene[2]
-				geneName = hmm_dict[gene[0]]
-				geneSeq = sequences[sample][contigID][start-1:end]
-				
-				if strand != '1':
-					geneSeq = str(geneSeq[::-1]).translate(trans)
-				else:
-					geneSeq = str(geneSeq)
-				
-				newTag = contigID+'|'+gene[1]+'|'+strand+'|'+geneName
-				protSeq = Seq.Seq(geneSeq).translate()
-				
-				candidateSeqs.append((newTag, protSeq))
-				
-	if not options.quiet:
-		sys.stdout.write('Done.\n')
 	
 	# write to temp fasta file
 	tempfasta = projInfo.out_dir + '/initCores/initCore.' + str(index + 1) + '.fa'
 	if os.path.exists(tempfasta):
 		pass
 	else:
+		sequences = {}
+		for sample in projInfo.samples:
+			assembly = projInfo.getAssemblyFile(sample)
+			if sample not in nodes:
+				continue
+			sequences[sample] = {}
+			afh = open(assembly, 'r')
+			contigDict = SeqIO.to_dict(SeqIO.parse(afh, "fasta"))
+			for node in nodes[sample]:
+				record = contigDict[node[0]]
+				seq = record.seq
+				sequences[sample][node[0]] = seq
+			afh.close()	
+	
+		# extract genes.
+		candidateSeqs = []
+		for sample in nodes:
+			for node in nodes[sample]:
+				contigID = node[0]
+				for gene in node[1]['HMM']:
+					tag = gene[0]
+					start, end = re.search('(\d+)\-(\d+)', gene[1]).group(1,2)
+					start = int(start)
+					end = int(end)
+					strand = gene[2]
+					geneName = hmm_dict[gene[0]]
+					geneSeq = sequences[sample][contigID][start-1:end]
+				
+					if strand != '1':
+						geneSeq = str(geneSeq[::-1]).translate(trans)
+					else:
+						geneSeq = str(geneSeq)
+					
+					newTag = contigID+'|'+gene[1]+'|'+strand+'|'+geneName
+					protSeq = Seq.Seq(geneSeq).translate()
+					
+					candidateSeqs.append((newTag, protSeq))
+		
 		sys.stdout.write('Writing fasta\n')
 		writeTempFasta(tempfasta, candidateSeqs)
 		sys.stdout.write('Done.\n')
@@ -236,8 +234,7 @@ def structPhylo(blatfile, tTree, projInfo):
 				taxid = hit[0]
 				taxonIDs, Ranks, sciNames = tTree.getTaxonomyPath(taxid)
 				temp.append(taxonIDs)
-			print len(temp)
-			for index, taxonIDs in temp:
+			for index, taxonIDs in enumerate(temp):
 				blatRes[contig][gene].insert(index*2, taxonIDs)
 	
 	# load partial tree/graph
