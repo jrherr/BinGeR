@@ -209,13 +209,15 @@ def structPhylo(blatfile, tTree, projInfo):
 		identity = float(cols[2])
 		percentageCov = float(cols[3])/geneLength
 		bitscore = float(cols[-1])
+		if bitscore < 50:
+			continue
 		
 		if contig not in blatRes:
 			blatRes[contig] = {}
 		if gene not in blatRes[contig]:
 			blatRes[contig][gene] = []
 			
-		if len(blatRes[contig][gene]) < 3 and bitscore > 50:
+		if len(blatRes[contig][gene]) < 3:
 			blatRes[contig][gene].append((taxid, percentageCov, identity, bitscore))
 		else:
 			bitscores = map(itemgetter(-1), blatRes[contig][gene])
