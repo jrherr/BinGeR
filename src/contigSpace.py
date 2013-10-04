@@ -848,7 +848,9 @@ class ContigSpace(nx.Graph):
 			if not options.quiet:
 				sys.stdout.write('Loading init cores from pickle...\n')
 			
-			for initCoresPickle in initCoresPickles:
+			for index, initCoresPickle in enumerate(initCoresPickles):
+				if index == 0:
+					continue
 				initCore = nx.Graph()
 				try:
 					cpfh = open(initCoresPickle, 'rb')
@@ -861,8 +863,8 @@ class ContigSpace(nx.Graph):
 			if not options.quiet:
 				sys.stdout.write('Done.\n')
 				
-			for index, initCore in enumerate(initCores):
-				sys.stdout.write('#%i has %i nodes.\n'%(index, nx.number_of_nodes(initCore)))
+#			for index, initCore in enumerate(initCores):
+#				sys.stdout.write('#%i has %i nodes.\n'%(index, nx.number_of_nodes(initCore)))
 				
 		else:
 			for index, component in enumerate(self.candidateComp):
