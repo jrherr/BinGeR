@@ -60,7 +60,7 @@ def nodePhylo(index, G, tTree, projInfo, options):
 		
 	# holds all involved sequences
 	if not options.quiet:
-		sys.stdout.write('[initCore %i] Now extracting core genes...\n'%index+1)
+		sys.stdout.write('[initCore %i] Now extracting core genes...\n'%(index+1))
 	
 	# write to temp fasta file
 	tempfasta = projInfo.out_dir + '/initCores/initCore.' + str(index + 1) + '.fa'
@@ -105,9 +105,9 @@ def nodePhylo(index, G, tTree, projInfo, options):
 					
 					candidateSeqs.append((newTag, protSeq))
 		
-		sys.stdout.write('[initCore %i] Writing fasta\n'%index+1)
+		sys.stdout.write('[initCore %i] Writing fasta\n'%(index+1))
 		writeTempFasta(tempfasta, candidateSeqs)
-		sys.stdout.write('[initCore %i] Done.\n'%index+1)
+		sys.stdout.write('[initCore %i] Done.\n'%(index+1))
 	
 	# run blat
 	blatfile = tempfasta.replace('fa', 'blat')
@@ -119,16 +119,16 @@ def nodePhylo(index, G, tTree, projInfo, options):
 		pass
 	else:
 		if not options.quiet:
-			sys.stdout.write('[initCore %i] Running blat.\n'%index+1)
+			sys.stdout.write('[initCore %i] Running blat.\n'%(index+1))
 		runBLAT(tempfasta, database, blatfile, logfile, options.blat)
 		if not options.quiet:
-			sys.stdout.write('[initCore %i] Done.\n'%index+1)
+			sys.stdout.write('[initCore %i] Done.\n'%(index+1))
 	
 	# dict with contig->taxonomy mapping
 	# interpret the results
 	if os.path.exists(phyloGraphFile):
 		if not options.quiet:
-			sys.stdout.write('[initCore %i] Unpickling phyloGraph...\n'%index+1)
+			sys.stdout.write('[initCore %i] Unpickling phyloGraph...\n'%(index+1))
 		try:
 			phfh = open(phyloGraph, 'rb')
 			phyloGraph = cPickle.load(phfh)
@@ -137,11 +137,11 @@ def nodePhylo(index, G, tTree, projInfo, options):
 			sys.stderr.write('FATAL: failure in unserializing phyloGraph.\n')
 			exit(0)
 		if not options.quiet:
-			sys.stdout.write('[initCore %i] Done.\n'%index)
+			sys.stdout.write('[initCore %i] Done.\n'%(index+1))
 	
 	else:
 		if not options.quiet:
-			sys.stdout.write('[initCore %i] Rendering result...\n'%index+1)
+			sys.stdout.write('[initCore %i] Rendering result...\n'%(index+1))
 		
 		phyloGraph = structPhylo(blatfile, tTree, projInfo)
 		
@@ -154,7 +154,7 @@ def nodePhylo(index, G, tTree, projInfo, options):
 			exit(0)
 			
 		if not options.quiet:
-			sys.stdout.write('[initCore %i] Done.\n'%index+1)
+			sys.stdout.write('[initCore %i] Done.\n'%(index+1))
 	
 	# cleanup
 #	os.remove(blatfile)
