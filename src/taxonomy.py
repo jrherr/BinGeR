@@ -26,6 +26,7 @@ https://github.com/luo-chengwei/BinGeR
 for help, type:
 python BinGeR.py --help
 """
+from operator import itemgetter
 
 class TaxonNode:
 	def __init__(self):
@@ -49,7 +50,7 @@ class TaxonTree:
 	def __init__(self):
 		self.nodes = {}
 		self.edges = {}
-		
+	
 	def loadTreeFromNodeLib(self, nodeLibFile, sciNameFile):
 		nodefh = open(nodeLibFile,'r')
 		sciNamefh = open(sciNameFile,'r')

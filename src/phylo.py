@@ -33,6 +33,9 @@ from string import maketrans
 from operator import itemgetter
 from Bio import SeqIO, Seq
 from subprocess import call
+import cPickle
+import networkx as nx
+import taxonomy
 
 def nodePhylo(index, G, tTree, projInfo, options):
 	nuc_dir = projInfo.out_dir + '/genes.nuc.clustered/'
@@ -111,6 +114,7 @@ def nodePhylo(index, G, tTree, projInfo, options):
 	# run blat
 	blatfile = tempfasta.replace('fa', 'blat')
 	logfile = tempfasta.replace('fa', 'log')
+	phyloGraphFile = tempfasta.replace('fa', 'graph.cpickle')
 	database = projInfo.out_dir + '/genes.prot.clustered/allGenes.fasta'
 	
 	if os.path.exists(blatfile):
@@ -124,17 +128,41 @@ def nodePhylo(index, G, tTree, projInfo, options):
 	
 	# dict with contig->taxonomy mapping
 	# interpret the results
-	if not options.quiet:
-		sys.stdout.write('Rendering result.\n')
-	phylo = structPhylo(blatfile, tTree, projInfo)
-	if not options.quiet:
-		sys.stdout.write('Done.\n')
+	if os.path.exists(phyloGraphFile):
+		if not options.quiet:
+			sys.stdout.write('Unpickling phyloGraph...\n')
+		try:
+			phfh = open(phyloGraph, 'rb')
+			phyloGraph = cPickle.load(phfh)
+			phfh.close()
+		except:
+			sys.stderr.write('FATAL: failure in unserializing phyloGraph.\n')
+			exit(0)
+		if not options.quiet:
+			sys.stdout.write('Done.\n')
+	
+	else:
+		if not options.quiet:
+			sys.stdout.write('Rendering result.\n')
+		
+		phyloGraph = structPhylo(blatfile, tTree, projInfo)
+		try:
+			phfh = open(phyloGraphFile, 'wb')
+			cPickle.dump(phyloGraph, phfh)
+			phfh.close()
+		except:
+			sys.stderr.write('FATAL: failure in unserializing phyloGraph.\n')
+			exit(0)
+			
+		if not options.quiet:
+			sys.stdout.write('Done.\n')
+	
 	# cleanup
 #	os.remove(blatfile)
 #	os.remove(logfile)
 #	os.remove(tempfasta)
 
-	return phylo
+	return phyloGraph
 	
 # End of nodePhylo
 
@@ -186,7 +214,7 @@ def structPhylo(blatfile, tTree, projInfo):
 		if gene not in blatRes[contig]:
 			blatRes[contig][gene] = []
 			
-		if len(blatRes[contig][gene]) < 5:
+		if len(blatRes[contig][gene]) < 3 and bitscore > 50:
 			blatRes[contig][gene].append((taxid, percentageCov, identity, bitscore))
 		else:
 			bitscores = map(itemgetter(-1), blatRes[contig][gene])
@@ -198,15 +226,48 @@ def structPhylo(blatfile, tTree, projInfo):
 				blatRes[contig][gene].append((taxid, percentageCov, identity, bitscore))
 	bfh.close()
 	
-	phylos = []
 	for contig in blatRes:
 		for gene in blatRes[contig]:
+			temp = [] 
 			for hit in blatRes[contig][gene]:
 				taxid = hit[0]
 				taxonIDs, Ranks, sciNames = tTree.getTaxonomyPath(taxid)
+				temp.append(taxonIDs)
+			for index, taxonIDs in temp:
+				blatRes[contig][gene].insert(index*2, taxonIDs)
 	
-	## perform LCA here.
+	# load partial tree/graph
+	pTree = nx.Graph()
+	edges = {}
+	for contigID in X:
+		for gene in X[contigID]:
+			for index in range(0, len(X[contigID][gene]), 2):
+				taxonID = X[contigID][gene][index]
+				detail = X[contigID][gene][index+1]
+				bitscore = detail[-1]
+				for i in range(len(taxonID)-1):
+					nodeA = taxonID[i]
+					if nodeA not in edges:
+						edges[nodeA] = {}
+					nodeB = taxonID[i+1]
+					if nodeB not in edges[nodeA]:
+						edges[nodeA][nodeB] = {'weight':0, 'genes':[]}
+					edges[nodeA][nodeB]['weight'] += bitscore
+					if index == 0:
+						edges[nodeA][nodeB]['genes'].append((contigID, gene))
+	e = []
+	for nodeA in edges:
+		for nodeB in edges[nodeA]:
+			bitscore = edges[nodeA][nodeB]['weight']
+			genes = edges[nodeA][nodeB]['genes']
+			e.append((nodeA, nodeB, {'weight':bitscore, 'genes':genes}))
+	pTree.add_edges_from(e)
 	
-	print 'Construction site'
-# End of estimatePhylo
+	return pTree
+	
+# End of structPhylo
+	
+def weightedLCA(pTree, tTree):
+	phylo = {}
+	return phylo
 	
