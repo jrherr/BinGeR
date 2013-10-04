@@ -948,16 +948,16 @@ class ContigSpace(nx.Graph):
 		# go through each initCore and refine them.
 		for coreIndex, initCore in enumerate(initCores):
 			# run personalized PageRank here to find the best clustering
-			sys.stdout.write('Running personalized PageRank algorithms now.\n')
 			
 			# get the taxonomy affiliation
 			# returned seed nodes is a dict keyed by weighted LCA and valued by list of contigIDs
 			pTree = phylo.nodePhylo(coreIndex, initCore, tTree, projInfo, options)
 			continue
 			
-			phylo = phylo.weightedLCA(pTree)
+			seedNodes = phylo.weightedLCA(pTree)
 			
 			# refine the graph using community PageRank
+			sys.stdout.write('Running personalized PageRank algorithms now.\n')
 			refinedCoreGraph = commPageRank(initCore, seedNodes, options)
 			
 			# output to self.cores

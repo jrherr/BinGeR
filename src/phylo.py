@@ -146,6 +146,7 @@ def nodePhylo(index, G, tTree, projInfo, options):
 			sys.stdout.write('Rendering result.\n')
 		
 		phyloGraph = structPhylo(blatfile, tTree, projInfo)
+		
 		try:
 			phfh = open(phyloGraphFile, 'wb')
 			cPickle.dump(phyloGraph, phfh)
