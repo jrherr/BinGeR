@@ -128,7 +128,7 @@ def nodePhylo(index, G, tTree, projInfo, options):
 	# interpret the results
 	if os.path.exists(phyloGraphFile):
 		if not options.quiet:
-			sys.stdout.write('[initCore %i] Unpickling phyloGraph...\n'%index+)
+			sys.stdout.write('[initCore %i] Unpickling phyloGraph...\n'%index+1)
 		try:
 			phfh = open(phyloGraph, 'rb')
 			phyloGraph = cPickle.load(phfh)
