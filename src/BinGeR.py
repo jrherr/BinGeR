@@ -67,6 +67,7 @@ from datetime import timedelta
 
 import contigSpace as cSpace
 import utilities
+import phylo
 
 ################################## CLASSES ################################
 class ProjectInfo:

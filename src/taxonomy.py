@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*- 
 
-
 """
 BinGeR (Binner for Genome Recovery): 
 	in-situ Genome recovery tool for series metagenomes
@@ -26,6 +25,7 @@ https://github.com/luo-chengwei/BinGeR
 for help, type:
 python BinGeR.py --help
 """
+
 from operator import itemgetter
 
 class TaxonNode:
