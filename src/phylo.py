@@ -60,7 +60,7 @@ def nodePhylo(index, G, tTree, projInfo, options):
 		
 	# holds all involved sequences
 	if not options.quiet:
-		sys.stdout.write('Now extracting core genes...\n')
+		sys.stdout.write('[initCore-%i] Now extracting core genes...\n'%index)
 	
 	# write to temp fasta file
 	tempfasta = projInfo.out_dir + '/initCores/initCore.' + str(index + 1) + '.fa'
@@ -105,9 +105,9 @@ def nodePhylo(index, G, tTree, projInfo, options):
 					
 					candidateSeqs.append((newTag, protSeq))
 		
-		sys.stdout.write('Writing fasta\n')
+		sys.stdout.write('\tWriting fasta\n')
 		writeTempFasta(tempfasta, candidateSeqs)
-		sys.stdout.write('Done.\n')
+		sys.stdout.write('\tDone.\n')
 	
 	# run blat
 	blatfile = tempfasta.replace('fa', 'blat')
@@ -119,16 +119,16 @@ def nodePhylo(index, G, tTree, projInfo, options):
 		pass
 	else:
 		if not options.quiet:
-			sys.stdout.write('Running blat.\n')
+			sys.stdout.write('\tRunning blat.\n')
 		runBLAT(tempfasta, database, blatfile, logfile, options.blat)
 		if not options.quiet:
-			sys.stdout.write('Done.\n')
+			sys.stdout.write('\tDone.\n')
 	
 	# dict with contig->taxonomy mapping
 	# interpret the results
 	if os.path.exists(phyloGraphFile):
 		if not options.quiet:
-			sys.stdout.write('Unpickling phyloGraph...\n')
+			sys.stdout.write('[initCore-%i] Unpickling phyloGraph...\n'%index)
 		try:
 			phfh = open(phyloGraph, 'rb')
 			phyloGraph = cPickle.load(phfh)
@@ -141,7 +141,7 @@ def nodePhylo(index, G, tTree, projInfo, options):
 	
 	else:
 		if not options.quiet:
-			sys.stdout.write('Rendering result...\n')
+			sys.stdout.write('[initCore-%i] Rendering result...\n'%index)
 		
 		phyloGraph = structPhylo(blatfile, tTree, projInfo)
 		
@@ -154,7 +154,7 @@ def nodePhylo(index, G, tTree, projInfo, options):
 			exit(0)
 			
 		if not options.quiet:
-			sys.stdout.write('Done.\n')
+			sys.stdout.write('\tDone.\n')
 	
 	# cleanup
 #	os.remove(blatfile)
@@ -222,8 +222,8 @@ def structPhylo(blatfile, tTree, projInfo):
 			minScore = min(bitscores)
 			if bitscore > minScore:
 				# remove the lowest scored one.
-				index = bitscores.index(minScore)
-				blatRes[contig][gene].pop(index)
+				minIndex = bitscores.index(minScore)
+				blatRes[contig][gene].pop(minIndex)
 				blatRes[contig][gene].append((taxid, percentageCov, identity, bitscore))
 	bfh.close()
 	
@@ -234,17 +234,17 @@ def structPhylo(blatfile, tTree, projInfo):
 				taxid = hit[0]
 				taxonIDs, Ranks, sciNames = tTree.getTaxonomyPath(taxid)
 				temp.append(taxonIDs)
-			for index, taxonIDs in enumerate(temp):
-				blatRes[contig][gene].insert(index*2, taxonIDs)
+			for i, taxonIDs in enumerate(temp):
+				blatRes[contig][gene].insert(i*2, taxonIDs)
 	
 	# load partial tree/graph
 	pTree = nx.Graph()
 	edges = {}
 	for contigID in blatRes:
 		for gene in blatRes[contigID]:
-			for index in range(0, len(blatRes[contigID][gene]), 2):
-				taxonID = blatRes[contigID][gene][index]
-				detail = blatRes[contigID][gene][index+1]
+			for i in range(0, len(blatRes[contigID][gene]), 2):
+				taxonID = blatRes[contigID][gene][i]
+				detail = blatRes[contigID][gene][i+1]
 				bitscore = detail[-1]
 				for i in range(len(taxonID)-1):
 					nodeA = taxonID[i]
@@ -254,7 +254,7 @@ def structPhylo(blatfile, tTree, projInfo):
 					if nodeB not in edges[nodeA]:
 						edges[nodeA][nodeB] = {'weight':0, 'genes':[]}
 					edges[nodeA][nodeB]['weight'] += bitscore
-					if index == 0:
+					if i == 0:
 						edges[nodeA][nodeB]['genes'].append((contigID, gene))
 	e = []
 	for nodeA in edges:

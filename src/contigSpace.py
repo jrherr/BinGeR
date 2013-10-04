@@ -861,6 +861,9 @@ class ContigSpace(nx.Graph):
 			if not options.quiet:
 				sys.stdout.write('Done.\n')
 				
+			for index, initCore in enumerate(initCores):
+				sys.stdout.write('#%i has %i nodes.\n'%(index, nx.number_of_nodes(initCore)))
+				
 		else:
 			for index, component in enumerate(self.candidateComp):
 				if not options.quiet:
@@ -952,6 +955,7 @@ class ContigSpace(nx.Graph):
 			# get the taxonomy affiliation
 			# returned seed nodes is a dict keyed by weighted LCA and valued by list of contigIDs
 			pTree = phylo.nodePhylo(coreIndex, initCore, tTree, projInfo, options)
+			
 			continue
 			
 			seedNodes = phylo.weightedLCA(pTree)
