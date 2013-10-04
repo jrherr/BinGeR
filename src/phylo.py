@@ -141,7 +141,7 @@ def nodePhylo(index, G, tTree, projInfo, options):
 	
 	else:
 		if not options.quiet:
-			sys.stdout.write('Rendering result.\n')
+			sys.stdout.write('Rendering result...\n')
 		
 		phyloGraph = structPhylo(blatfile, tTree, projInfo)
 		
@@ -240,11 +240,11 @@ def structPhylo(blatfile, tTree, projInfo):
 	# load partial tree/graph
 	pTree = nx.Graph()
 	edges = {}
-	for contigID in X:
-		for gene in X[contigID]:
-			for index in range(0, len(X[contigID][gene]), 2):
-				taxonID = X[contigID][gene][index]
-				detail = X[contigID][gene][index+1]
+	for contigID in blatRes:
+		for gene in blatRes[contigID]:
+			for index in range(0, len(blatRes[contigID][gene]), 2):
+				taxonID = blatRes[contigID][gene][index]
+				detail = blatRes[contigID][gene][index+1]
 				bitscore = detail[-1]
 				for i in range(len(taxonID)-1):
 					nodeA = taxonID[i]
