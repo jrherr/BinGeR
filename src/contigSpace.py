@@ -828,6 +828,7 @@ class ContigSpace(nx.Graph):
 		#
 		# The cores will be output to self.core attribute for later analysis
 		"""
+		
 		if not options.quiet:
 			sys.stdout.write('Now refining cores...\n')
 		
@@ -863,13 +864,10 @@ class ContigSpace(nx.Graph):
 			if not options.quiet:
 				sys.stdout.write('Done.\n')
 				
-#			for index, initCore in enumerate(initCores):
-#				sys.stdout.write('#%i has %i nodes.\n'%(index, nx.number_of_nodes(initCore)))
-				
 		else:
 			for index, component in enumerate(self.candidateComp):
 				if not options.quiet:
-					sys.stdout.write('Init core-%i\n'%(index+1))
+					sys.stdout.write('[initCore %i] Graph initialization.\n'%(index+1))
 				# expand the component.
 				coreGraph = nx.Graph()
 				for clusterName in component:
@@ -905,7 +903,7 @@ class ContigSpace(nx.Graph):
 					exit(0)
 		
 		# go through each initCore and apply community PageRank
-		coreID = 0
+		
 		if not options.quiet:
 			sys.stdout.write('Now loading taxonomy tree...\n')
 		tTree = TaxonTree()
@@ -951,12 +949,13 @@ class ContigSpace(nx.Graph):
 			sys.stdout.write('Done.\n')
 			
 		# go through each initCore and refine them.
+		coreID = 0
 		for coreIndex, initCore in enumerate(initCores):
 			# run personalized PageRank here to find the best clustering
 			
 			# get the taxonomy affiliation
 			# returned seed nodes is a dict keyed by weighted LCA and valued by list of contigIDs
-			pTree = phylo.nodePhylo(coreIndex + 1, initCore, tTree, projInfo, options)
+			pTree = phylo.nodePhylo(coreIndex+1, initCore, tTree, projInfo, options)
 			
 			continue
 			
@@ -975,7 +974,7 @@ class ContigSpace(nx.Graph):
 					self.cores[coreID].append(contigID)
 	
 				if not options.quiet:
-					sys.stdout.write('Core - %i has %i nodes \n'%(coreID, len(core)))
+					sys.stdout.write('initCore %i has %i nodes \n'%(coreID, len(core)))
 		
 		return
 		

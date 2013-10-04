@@ -49,9 +49,11 @@ def nodePhylo(index, G, tTree, projInfo, options):
 			hmm_dict[tag] = geneName
 
 	nodes = {}
+	numberGenes = 0
 	for node in G.nodes(data = True):
 		if 'HMM' not in node[1]:
 			continue
+		numberGenes += 1
 		contigID = node[0]
 		sample = node[1]['sample']
 		if sample not in nodes:
@@ -60,10 +62,11 @@ def nodePhylo(index, G, tTree, projInfo, options):
 		
 	# holds all involved sequences
 	if not options.quiet:
-		sys.stdout.write('[initCore %i] Now extracting core genes...\n'%(index+1))
+		sys.stdout.write('[initCore %i] Now extracting core genes [%i genes]...\n'%(index+1, numberGenes))
 	
 	# write to temp fasta file
-	tempfasta = projInfo.out_dir + '/initCores/initCore.' + str(index + 1) + '.fa'
+	tempfasta = projInfo.out_dir + '/initCores/initCore.' + str(index+1) + '.fa'
+	
 	if os.path.exists(tempfasta):
 		pass
 	else:
