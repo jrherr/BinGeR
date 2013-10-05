@@ -951,11 +951,10 @@ class ContigSpace(nx.Graph):
 		# go through each initCore and refine them.
 		coreID = 0
 		for coreIndex, initCore in enumerate(initCores):
-			# run personalized PageRank here to find the best clustering
-			
 			# get the taxonomy affiliation
 			# returned seed nodes is a dict keyed by weighted LCA and valued by list of contigIDs
-			pTree = phylo.nodePhylo(coreIndex+1, initCore, tTree, projInfo, options)
+			
+			pTree = phylo.nodePhylo(coreIndex, initCore, tTree, projInfo, options)
 			
 			continue
 			

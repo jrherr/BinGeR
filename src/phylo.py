@@ -50,8 +50,9 @@ def nodePhylo(index, G, tTree, projInfo, options):
 
 	nodes = {}
 	numberGenes = 0
-	sys.stdout.write('[initCore %i] Core has %i genes.\n'%(index+1, 
-						nx.number_of_nodes(G)))
+	if not options.quiet:
+		sys.stdout.write('[initCore %i] Core has %i contigs.\n'%(index+1, 
+							nx.number_of_nodes(G)))
 	
 	for node in G.nodes(data = True):
 		if 'HMM' not in node[1]:
