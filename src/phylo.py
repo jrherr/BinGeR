@@ -133,11 +133,12 @@ def nodePhylo(index, G, tTree, projInfo, options):
 	
 	# dict with contig->taxonomy mapping
 	# interpret the results
+	
 	if os.path.exists(phyloGraphFile):
 		if not options.quiet:
 			sys.stdout.write('[initCore %i] Unpickling phyloGraph...\n'%(index+1))
 		try:
-			phfh = open(phyloGraph, 'rb')
+			phfh = open(phyloGraphFile, 'rb')
 			phyloGraph = cPickle.load(phfh)
 			phfh.close()
 		except:
@@ -243,33 +244,36 @@ def structPhylo(blatfile, tTree, projInfo):
 				temp.append(taxonIDs)
 			for i, taxonIDs in enumerate(temp):
 				blatRes[contig][gene].insert(i*2, taxonIDs)
-	
+				
 	# load partial tree/graph
 	pTree = nx.Graph()
-	edges = {}
+	edges = []
+	tempNodes = {}
 	for contigID in blatRes:
 		for gene in blatRes[contigID]:
 			for i in range(0, len(blatRes[contigID][gene]), 2):
-				taxonID = blatRes[contigID][gene][i]
-				detail = blatRes[contigID][gene][i+1]
-				bitscore = detail[-1]
-				for i in range(len(taxonID)-1):
-					nodeA = taxonID[i]
-					if nodeA not in edges:
-						edges[nodeA] = {}
-					nodeB = taxonID[i+1]
-					if nodeB not in edges[nodeA]:
-						edges[nodeA][nodeB] = {'weight':0, 'genes':[]}
-					edges[nodeA][nodeB]['weight'] += bitscore
-					if i == 0:
-						edges[nodeA][nodeB]['genes'].append((contigID, gene))
-	e = []
-	for nodeA in edges:
-		for nodeB in edges[nodeA]:
-			bitscore = edges[nodeA][nodeB]['weight']
-			genes = edges[nodeA][nodeB]['genes']
-			e.append((nodeA, nodeB, {'weight':bitscore, 'genes':genes}))
-	pTree.add_edges_from(e)
+				taxonIDs = blatRes[contigID][gene][i]
+				details = blatRes[contigID][gene][i+1]
+				bitscore = details[-1]
+				for j in range(len(taxonIDs)-1):
+					nodeA = taxonIDs[j]
+					nodeB = taxonIDs[j+1]
+					edges.append((nodeA, nodeB))
+					
+					if j == 0:
+						if nodeA not in tempNodes:
+							tempNodes[nodeA] = [(contigID, gene, bitscore)]
+						else:
+							tempNodes[nodeA].append((contigID, gene, bitscore))
+	nodes = []
+	for node in tempNodes:
+		nodes.append((node, {'members':tempNodes[node]}))
+	tempNodes = {}
+	
+	pTree.add_edges_from(edges)
+	edges = []
+	pTree.add_nodes_from(nodes)
+	nodes = []
 	
 	return pTree
 	
@@ -277,5 +281,8 @@ def structPhylo(blatfile, tTree, projInfo):
 	
 def weightedLCA(pTree, tTree):
 	phylo = {}
+	
+	
+	
 	return phylo
 	

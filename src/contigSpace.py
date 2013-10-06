@@ -850,14 +850,12 @@ class ContigSpace(nx.Graph):
 				sys.stdout.write('Loading init cores from pickle...\n')
 			
 			for index, initCoresPickle in enumerate(initCoresPickles):
-				if index == 0:
-					continue
 				initCore = nx.Graph()
 				try:
 					cpfh = open(initCoresPickle, 'rb')
 					initCore = cPickle.load(cpfh)
 					cpfh.close()
-					initCores.append(initCore)
+					initCores.append(initCore.copy())
 				except:
 					sys.stderr.write('FATAL: Error during unpickling init cores.\n')
 					exit(0)
