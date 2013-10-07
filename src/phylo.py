@@ -37,6 +37,16 @@ import cPickle
 import networkx as nx
 import taxonomy
 
+####################### CLASSES ###########################
+class scGeneTable:
+	def __init__(self, projInfo):
+		self.samples = projInfo.samples
+		self.scGenes = projInfo.HMM.keys()
+		self.table = np.zeros((len(self.samples), len(self.scGenes)))
+			
+
+###################### FUNCTIONS ##########################
+
 def nodePhylo(index, G, tTree, projInfo, options):
 	nuc_dir = projInfo.out_dir + '/genes.nuc.clustered/'
 	prot_dir = projInfo.out_dir + '/genes.prot.clustered/'
@@ -246,7 +256,7 @@ def structPhylo(blatfile, tTree, projInfo):
 				blatRes[contig][gene].insert(i*2, taxonIDs)
 				
 	# load partial tree/graph
-	pTree = nx.Graph()
+	pTree = nx.DiGraph()
 	edges = []
 	tempNodes = {}
 	for contigID in blatRes:
@@ -254,35 +264,62 @@ def structPhylo(blatfile, tTree, projInfo):
 			for i in range(0, len(blatRes[contigID][gene]), 2):
 				taxonIDs = blatRes[contigID][gene][i]
 				details = blatRes[contigID][gene][i+1]
+				if len(taxonIDs) == 0:
+					continue
 				bitscore = details[-1]
-				for j in range(len(taxonIDs)-1):
-					nodeA = taxonIDs[j]
-					nodeB = taxonIDs[j+1]
-					edges.append((nodeA, nodeB))
-					
-					if j == 0:
-						if nodeA not in tempNodes:
-							tempNodes[nodeA] = [(contigID, gene, bitscore)]
-						else:
-							tempNodes[nodeA].append((contigID, gene, bitscore))
+				pTree.add_path(taxonIDs[::-1])
+				endNode = taxonIDs[0]
+				if endNode not in tempNodes:
+					tempNodes[endNode] = [(contigID, gene, bitscore)]
+				else:
+					tempNodes[endNode].append((contigID, gene, bitscore))
 	nodes = []
 	for node in tempNodes:
 		nodes.append((node, {'members':tempNodes[node]}))
 	tempNodes = {}
 	
-	pTree.add_edges_from(edges)
-	edges = []
 	pTree.add_nodes_from(nodes)
 	nodes = []
 	
 	return pTree
 	
 # End of structPhylo
-	
-def weightedLCA(pTree, tTree):
+
+
+def strainer(pTree, tTree, projInfo):
 	phylo = {}
+	if pTree.size() == 0:
+		return phylo
 	
+	nodes = pTree.nodes(data = True)
+	inDegrees = pTree.in_degree(nodes)
+	outDegrees = pTree.out_degree(nodes)
 	
+	# get the lowest common ancestor, also form the lookup table contigID->sample
+	contigLookup = {}
+	roots = []
+	for inDegree, outDegree, node in zip(inDegrees, outDegree, nodes):
+		if inDegree == 0:
+			roots.append(node)
+		if outDegree == 0:
+			for (contigID, gene, bitscore) in node[1]['members']:
+				contigLookup[contigID] = None
+	for sample in projInfo.samples:
+		assemblyFile = projInfo.getAssemblyFile(sample)
+		afh = open(assemblyFile, 'r')
+		for record in SeqIO.parse(SeqIO.parse(afh, "fasta")):
+			if record.name in contigLookup:
+				contigLookup[record.name] = sample
+		afh.close()
+	
+	# trim the tree
+	while len(roots) > 0:
+		for root in roots:
+			table = scGeneTable()
+			table.initTable(pTree, root, contigLookup)
+			
 	
 	return phylo
+
+# End of strainer
 	

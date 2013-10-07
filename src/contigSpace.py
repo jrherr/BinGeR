@@ -956,7 +956,7 @@ class ContigSpace(nx.Graph):
 			
 			continue
 			
-			seedNodes = phylo.weightedLCA(pTree)
+			seedNodes = phylo.strainer(pTree, tTree, projInfo)
 			
 			# refine the graph using community PageRank
 			sys.stdout.write('Running personalized PageRank algorithms now.\n')
