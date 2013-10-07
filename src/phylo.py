@@ -35,6 +35,7 @@ from Bio import SeqIO, Seq
 from subprocess import call
 import cPickle
 import networkx as nx
+import numpy as np
 import taxonomy
 
 ####################### CLASSES ###########################
@@ -43,9 +44,51 @@ class scGeneTable:
 		self.samples = projInfo.samples
 		self.scGenes = projInfo.HMM.keys()
 		self.table = np.zeros((len(self.samples), len(self.scGenes)))
-			
+		
+	def initTable(self, pTree, root, contigLookup):
+		endNodes = getEndNodes(pTree, root)
+		genes = {}
+		for node in endNodes:
+			members = pTree.node[node]['members']
+			for member in members:
+				contigID = member[0]
+				gene = member[1]
+				geneIndex = self.scGenes.index(gene)
+				sample = contigLookup[contigID]
+				sampleIndex = self.samples.index(sample)
+				self.table[sampleIndex][geneIndex] += 1
+				
+	def number_of_strains(self):
+		counts = []
+		for row in self.table.transpose():
+			counts.append(row.max())
+		return np.median(np.array(counts))
+	
 
 ###################### FUNCTIONS ##########################
+
+def getEndNodes(pTree, root):
+	nodes = [root]
+	endNodes = []
+	while len(nodes) > 0:
+		nodes_to_remove = []
+		nodes_to_add = []
+		for node in nodes:
+			successors = pTree.successors(node)
+			if len(successors) == 0:
+				endNodes.append(node)
+			else:
+				nodes_to_add += successors
+			nodes_to_remove.append(node)
+		
+		for node in nodes_to_remove:
+			nodes.remove(node)
+			
+		nodes += nodes_to_add
+		
+	return endNodes
+	
+#End of getEndNodes
 
 def nodePhylo(index, G, tTree, projInfo, options):
 	nuc_dir = projInfo.out_dir + '/genes.nuc.clustered/'
@@ -292,34 +335,76 @@ def strainer(pTree, tTree, projInfo):
 		return phylo
 	
 	nodes = pTree.nodes(data = True)
-	inDegrees = pTree.in_degree(nodes)
-	outDegrees = pTree.out_degree(nodes)
-	
+	inDegrees = pTree.in_degree(map(itemgetter(0), nodes))
+	outDegrees = pTree.out_degree(map(itemgetter(0), nodes))
 	# get the lowest common ancestor, also form the lookup table contigID->sample
 	contigLookup = {}
 	roots = []
-	for inDegree, outDegree, node in zip(inDegrees, outDegree, nodes):
+	for node in nodes:
+		nodeID = node[0]
+		inDegree = inDegrees[nodeID]
+		outDegree = outDegrees[nodeID]
 		if inDegree == 0:
-			roots.append(node)
+			if nodeID == 10239:    #if it is virus, simply output all the endnodes
+				endNodes = getEndNodes(pTree, nodeID)
+				for endNode in endNodes:
+					name = tTree.getSciName(endNode)
+					contigs = map(itemgetter(0), pTree.node[endNode]['members'])
+					phylo[name] = contigs
+			else:
+				roots.append(nodeID)
+				
 		if outDegree == 0:
 			for (contigID, gene, bitscore) in node[1]['members']:
 				contigLookup[contigID] = None
+	
 	for sample in projInfo.samples:
 		assemblyFile = projInfo.getAssemblyFile(sample)
 		afh = open(assemblyFile, 'r')
-		for record in SeqIO.parse(SeqIO.parse(afh, "fasta")):
+		for record in SeqIO.parse(afh, "fasta"):
 			if record.name in contigLookup:
 				contigLookup[record.name] = sample
 		afh.close()
 	
 	# trim the tree
-	while len(roots) > 0:
-		for root in roots:
-			table = scGeneTable()
-			table.initTable(pTree, root, contigLookup)
-			
 	
-	return phylo
+	tempClusters = {}  # store those with good clustering
+	tightClusters = {} # store those needs further clustering
+	while len(roots) > 0:
+		root_to_add = []
+		root_to_remove = []
+		for root in roots:
+			table = scGeneTable(projInfo)
+			table.initTable(pTree, root, contigLookup)
+			numStr = table.number_of_strains()
+			if numStr < 2:
+				endNodes = getEndNodes(pTree, root)
+				tempClusters[root] = endNodes
+			elif len(pTree.successors(root)) == 0:
+				tightClusters[root] = root
+			else:
+				root_to_add += pTree.successors(root)
+				
+			root_to_remove.append(root)
+		
+		for root in root_to_remove:
+			roots.remove(root)
+		
+		roots += root_to_add
+		
+	for lca in tempClusters:
+		lca = tTree.getSciName(lca)
+		phylo[lca] = []
+		for node in tempClusters[lca]:
+			for member in pTree.node[node]['members']:
+				phylo[lcaName].append(member[0])
+	tight = {}
+	for lca in tightClusters:
+		tight[lca] = []
+		for member in pTree.node[lca]['members']:
+			tight[lcaName].append(member[0])
+	
+	return phylo, tight
 
 # End of strainer
 	

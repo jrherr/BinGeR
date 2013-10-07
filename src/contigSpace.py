@@ -954,13 +954,11 @@ class ContigSpace(nx.Graph):
 			
 			pTree = phylo.nodePhylo(coreIndex, initCore, tTree, projInfo, options)
 			
-			continue
-			
-			seedNodes = phylo.strainer(pTree, tTree, projInfo)
+			seedNodes, tightNodes = phylo.strainer(pTree, tTree, projInfo)
 			
 			# refine the graph using community PageRank
 			sys.stdout.write('Running personalized PageRank algorithms now.\n')
-			refinedCoreGraph = commPageRank(initCore, seedNodes, options)
+			refinedCoreGraph = commPageRank(initCore, seedNodes, tightNodes, options)
 			
 			# output to self.cores
 			# need to output taxonomy affiliation as well.

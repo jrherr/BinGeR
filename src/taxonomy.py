@@ -93,6 +93,13 @@ class TaxonTree:
 				self.edges[currentNodeID].toNode = prevNodeID
 		nodefh.close()
 		
+	def getSciName(self, nodeID):
+		try:
+			node = self.nodes[nodeID]
+		except KeyError:
+			return None
+		return node.sciName
+			
 	def getTaxonomyPath(self, nodeID):
 		taxonIDs = []
 		Ranks = []
