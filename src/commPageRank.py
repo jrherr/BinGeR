@@ -31,7 +31,6 @@ import re
 import os
 import numpy as np
 
-def commPageRank(initCore, nodePhylo, options):
-	print "code under construction"
-	
+def commPageRank(initCore, seedNodes, tightNodes, options):
+	print "code under construction."
 	
