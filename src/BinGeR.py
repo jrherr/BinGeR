@@ -368,16 +368,13 @@ def main(argv = sys.argv[1:]):
 							type = "int", default = 3000, metavar = 'INT',
 							help = "Minimum contig length to be considered in Z-score clustering [default: 2000].")
 	
-	"""
-	clusteringOptions.add_option("-e", "--prk_e", type = "float", default = 2.0, metavar = 'FLOAT',
-							help = "The expansion factor in Markov Clustering Algorithm (MCL) [default: 2.0].")
 	
-	clusteringOptions.add_option("-i", "--mcl_i", type = "float", default = 2.0, metavar = 'FLOAT',
-							help = "The inflation factor in Markov Clustering Algorithm (MCL) [default: 2.0].")
+	clusteringOptions.add_option("--cpr_alpha", type = "float", default = 0.99, metavar = 'FLOAT',
+							help = "The dampening factor, alpha, in community personalized PageRank [default: 0.99].")
+	
+	clusteringOptions.add_option("--cpr_tol", type = "float", default = 0.01, metavar = 'FLOAT',
+							help = "The toll in community personalized PageRank [default: 0.01].")
 							
-	clusteringOptions.add_option("-w", "--mcl_w", type = "int", default = 5, metavar = 'INT',
-							help = "The step width in Markov Clustering Algorithm (MCL) [default: 5].")
-	"""
 	
 	parser.add_option_group(clusteringOptions)
 
@@ -412,19 +409,14 @@ def main(argv = sys.argv[1:]):
 		parser.error("Size of minimum bin size must be in range [1e4, 1e6]bp, you supplied %i" % options.min_core)
 		exit(0)
 	
-	"""
-	if options.mcl_e <= 1 or options.mcl_i >= 5:
-		parser.error("Expansion factor for MCL must be in range (1, 5), you supplied %.3f" % options.mcl_e)
+	
+	if options.cpr_alpha <= 0.5 or options.cpr_alpha > 1:
+		parser.error("Community PageRank Alpha must be in range (0.5, 1), you supplied %.3f" % options.cpr_alpha)
 		exit(0)
 	
-	if options.mcl_i <= 1 or options.mcl_i >= 5:
-		parser.error("Inflation factor for MCL must be in range (1, 5), you supplied %.3f" % options.mcl_i)
+	if options.cpr_tol <= 1 or options.cpr_tol >= 5:
+		parser.error("Inflation factor for MCL must be in range (1, 5), you supplied %.3f" % options.cpr_tol)
 		exit(0)
-		
-	if options.mcl_w < 1 or options.mcl_w > 50:
-		parser.error("Step width for MCL must be in range [1, 50], you supplied %i" % options.mcl_w)
-		exit(0)
-	"""
 
 	total_start_time = time()
 	sys.stdout.write("BinGeR started at %s\n"%(ctime()))

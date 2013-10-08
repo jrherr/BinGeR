@@ -32,5 +32,6 @@ import os
 import numpy as np
 
 def commPageRank(initCore, seedNodes, tightNodes, options):
+	
 	print "code under construction."
 	

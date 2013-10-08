@@ -393,7 +393,6 @@ def strainer(pTree, tTree, projInfo):
 		roots += root_to_add
 		
 	for lca in tempClusters:
-		lca = tTree.getSciName(lca)
 		phylo[lca] = []
 		for node in tempClusters[lca]:
 			for member in pTree.node[node]['members']:
