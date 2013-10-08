@@ -414,8 +414,8 @@ def main(argv = sys.argv[1:]):
 		parser.error("Community PageRank Alpha must be in range (0.5, 1), you supplied %.3f" % options.cpr_alpha)
 		exit(0)
 	
-	if options.cpr_tol <= 1 or options.cpr_tol >= 5:
-		parser.error("Inflation factor for MCL must be in range (1, 5), you supplied %.3f" % options.cpr_tol)
+	if options.cpr_tol <= 0.01 or options.cpr_tol >= 0.2:
+		parser.error("Inflation factor for MCL must be in range (0.01, 0.2), you supplied %.3f" % options.cpr_tol)
 		exit(0)
 
 	total_start_time = time()
