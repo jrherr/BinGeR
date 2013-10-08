@@ -38,7 +38,7 @@ setup(
 				'src/utilities.py', 'src/phylo.py'],
 	
 	data_files = [('db', ['db/HMM.txt', 'db/ncbiNodes.lib', 'db/ncbiSciNames.lib',
-						'db/singleCopy.nuc.tar.gz', 'db/singleCopy.prot.tar.gz'])],
+						'db/singleCopy.prot.tar.gz'])],
 	
 	author="Chengwei Luo",
     author_email="luo.chengwei@gatech.edu",
