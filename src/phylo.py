@@ -396,12 +396,12 @@ def strainer(pTree, tTree, projInfo):
 		phylo[lca] = []
 		for node in tempClusters[lca]:
 			for member in pTree.node[node]['members']:
-				phylo[lcaName].append(member[0])
+				phylo[lca].append(member[0])
 	tight = {}
 	for lca in tightClusters:
 		tight[lca] = []
 		for member in pTree.node[lca]['members']:
-			tight[lcaName].append(member[0])
+			tight[lca].append(member[0])
 	
 	return phylo, tight
 
