@@ -39,9 +39,10 @@ def commPageRank(initCore, seedNodes, options):
 	sets = {}
 	for lca in seedNodes:
 		print lca
+		"""
 		# for each seed set we pick 20 at random
 		seedNum = max(20, len(seedNodes[lca]))
-		seeds = random.sample(seedNodes[lca], seedNum)
+		seeds = set(random.sample(seedNodes[lca], seedNum))
 		numPath = 0
 		totalDis = 0
 		centerDis = 1e10
@@ -54,14 +55,16 @@ def commPageRank(initCore, seedNodes, options):
 				centerDis = row.sum()
 				centerNode = seeds[seedIndex]
 		print 'average path length:', avgDist
-		
+		"""
 		# reduce the search space by searching only subgraph with a certain depth from seeds
-		nodes = nx.ego_graph(subgraph, centerNode, radius = avgDist).nodes()
-		print '#nodes:', len(nodes)
-		subgraph = initCore.subgraph(nodes)
+		
 		contigCounts = {}
 		for seed in seeds:
-			print '\t',seed
+			print seed
+			nodes = nx.ego_graph(subgraph, seed, radius =6).nodes()
+			print '#nodes:', len(nodes)
+			subgraph = initCore.subgraph(nodes)
+			print 'subgraph extracted'
 			contigSet = pprc(subgraph, seed, alpha)
 			for contig in contigSet:
 				if contig not in contigCounts:
