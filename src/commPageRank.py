@@ -46,21 +46,17 @@ def commPageRank(initCore, seedNodes, options):
 		totalDis = 0
 		centerDis = 1e10
 		centerNode = None
-		for seed in seeds:
-			paths = nx.shortest_path(initCore, seed)
-			numPath += len(paths)
-			sumDis = 0
-			for path in paths:
-				totalDis += len(path)
-				sumDis += len(path)
-			if sumDis < centerDis:
-				centerDis = sumDis
-				centerNode = seed
+		distanceMatrix = nx.floyd_warshall_numpy(initCore, seeds)
+		vol = len(seeds)*(len(seeds) - 1)
+		avgDist = distanceMatrix.sum()/vol
+		for seedIndex, row in enumerate(distanceMatrix):
+			if row.sum() < centerDis:
+				centerDis = row.sum()
+				centerNode = seeds[seedIndex]
+		print 'average path length:', avgDist
 		
-		radius = 0.5*float(totalDis)/numPath
-		print radius
 		# reduce the search space by searching only subgraph with a certain depth from seeds
-		nodes = nx.ego_graph(subgraph, centerNode, radius = max(5, radius)).nodes()
+		nodes = nx.ego_graph(subgraph, centerNode, radius = avgDist).nodes()
 		print '#nodes:', len(nodes)
 		subgraph = initCore.subgraph(nodes)
 		contigCounts = {}
