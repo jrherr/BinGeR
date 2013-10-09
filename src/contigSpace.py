@@ -823,8 +823,8 @@ class ContigSpace(nx.Graph):
 		#
 		# For the cores that passed the filtering, each core will first be assess by their
 		# single-copy gene distribution, as well as the shape of the cluster. If necessary,
-		# it will go through a custom Markov Clustering algorithm (Van Dongen S., 2000;
-		# see micans.org/mcl/ for theoretical details) to split them until converge.
+		# it will go through a community personalized PageRank algorithm (David F. Gleich,
+		# Purdue University) to split them until converge.
 		#
 		# The cores will be output to self.core attribute for later analysis
 		"""
@@ -832,8 +832,24 @@ class ContigSpace(nx.Graph):
 		if not options.quiet:
 			sys.stdout.write('Now refining cores...\n')
 		
-		# results are stored at out_dir/initCore/
+		# if there is already pickled cores, just load from there
+		pickledCoresFile = projInfo.out_dir + 'cores.cpickle'
+		if os.path.exists(pickledCoresFile):
+			if not options.quiet:
+				sys.stdout.write('Loading refined cores from pickle...\n')
+			try:
+				corefh = open(pickledCoresFile, 'rb')
+				self.cores = cPickle.load(corefh)
+				corefh.close()
+			except:
+				sys.stderr.write('FATAL: failure in unpickling refined cores.\n')
+				exit(0)
+			if not options.quiet:
+				sys.stdout.write('Done.\n')
+			
+			return
 		
+		# otherwise we go through initCores and refine them
 		initCoresPath = projInfo.out_dir + '/initCores'
 		if not os.path.exists(initCoresPath):
 			try:
@@ -956,43 +972,49 @@ class ContigSpace(nx.Graph):
 			
 			seedNodes, tightNodes = phylo.strainer(pTree, tTree, projInfo)
 			
-			# refine the graph using community PageRank
-			sys.stdout.write('Running personalized PageRank algorithms now.\n')
-			refinedCoreGraph = commPageRank(initCore, seedNodes, tightNodes, options)
-			
-			# output to self.cores
-			# need to output taxonomy affiliation as well.
-			for core in nx.connected_components(refinedCoreGraph):
-				coreID += 1
-				self.cores[coreID] = []
-				for contigID in core:
-					self.cores[coreID].append(contigID)
-	
-				if not options.quiet:
-					sys.stdout.write('initCore %i has %i nodes \n'%(coreID, len(core)))
-		
-		return
+			# refine the graph using community PageRank if necessary
+			if len(seedNodes.keys()) + len(tightNodes.keys()) > 1:
+				sys.stdout.write('Running personalized PageRank algorithms now.\n')
+				contigSets = commPageRank(initCore, seedNodes, options)
+				for lca in contigSets:
+					coreIndex += 1
+					coreID = str(coreIndex) + '.' + str(lca)
+					self.cores[coreID] = contigSets
+				
+				if len(tightNodes) != 0:
+					tightContigSets = commPageRank(initCore, tightNodes, options)
+					for lca in contigSets:
+						coreIndex += 1
+						coreID = str(coreIndex) + '.' + str(lca) + '.compact'
+			else:
+				coreIndex += 1
+				if len(seedNodes.keys()) == 1:
+					lca = seedNodes.keys()[0]
+					coreID = str(coreIndex) + '.' + str(lca)
+				elif len(tightNodes.keys()) == 1:
+					lca = tightNodes.keys()[0]
+					coreID = str(coreIndex) + '.' + str(lca)
+				else:
+					coreID = str(coreIndex) + '.unknown'
+					
+				self.cores[coreID] = initCore.nodes()
 		
 		# clean up self.graphs to release RAM
 		for clusterName in self.graphs:
 			self.graphs[clusterName].clear()
 			
 		# pickle self.cores
-		self.pickleCores(corePickle, options)
+		self.pickleCores(pickledCoresFile, options)
 		
 		if not options.quiet:
 			sys.stdout.write('Done.\n')
 
 		# clean up the directory
 		try:
-			shutil.rmtree(projInfo.out_dir + '/genes.nuc.clustered/')
-		except:
-			sys.stderr.write('WARNING: Failure in removing intermediate nucleotide sequences directory.\n')
-			
-		try:
 			shutil.rmtree(projInfo.out_dir + '/genes.prot.clustered/')
 		except:
 			sys.stderr.write('WARNING: Failure in removing intermediate protein sequences directory.\n')	
+	
 	# End of refineCores
 
 

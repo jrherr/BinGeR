@@ -372,10 +372,6 @@ def main(argv = sys.argv[1:]):
 	clusteringOptions.add_option("--cpr_alpha", type = "float", default = 0.99, metavar = 'FLOAT',
 							help = "The dampening factor, alpha, in community personalized PageRank [default: 0.99].")
 	
-	clusteringOptions.add_option("--cpr_tol", type = "float", default = 0.01, metavar = 'FLOAT',
-							help = "The toll in community personalized PageRank [default: 0.01].")
-							
-	
 	parser.add_option_group(clusteringOptions)
 
 	# runtime settings that could affect the file saving and message printing
@@ -412,10 +408,6 @@ def main(argv = sys.argv[1:]):
 	
 	if options.cpr_alpha <= 0.5 or options.cpr_alpha >= 1:
 		parser.error("Community PageRank Alpha must be in range (0.5, 1), you supplied %.3f" % options.cpr_alpha)
-		exit(0)
-	
-	if options.cpr_tol <= 0 or options.cpr_tol >= 0.2:
-		parser.error("Community PageRank Alpha must be in range (0, 0.2), you supplied %.3f" % options.cpr_tol)
 		exit(0)
 
 	total_start_time = time()
