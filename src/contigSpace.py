@@ -49,14 +49,6 @@ from commPageRank import commPageRank
 
 ######################## CLASSES ######################
 class ContigSpace(nx.Graph):
-	def __init__(self):
-		self.graphs = {}
-		self.graph = nx.Graph()
-		self.cores = {}
-		self.bridges = nx.Graph()
-		self.coreLookup = {}
-		self.nodeLookup = {}
-		self.candidateComp = []
 	
 	def __init__(self, samples):
 		self.graphs = {}

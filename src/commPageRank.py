@@ -31,7 +31,7 @@ import re
 import os
 import random
 import collections
-#import networkx as nx
+import networkx as nx
 
 def commPageRank(initCore, seedNodes, options):
 	alpha = options.cpr_alpha
@@ -40,17 +40,30 @@ def commPageRank(initCore, seedNodes, options):
 	sets = {}
 	for lca in seedNodes:
 		# for each seed set we pick 20 at random
-		seeds = random.sample(seedNodes[lca], 20)
+		seedNum = max(20, len(seedNodes[lca]))
+		seeds = random.sample(seedNodes[lca], seedNum)
+		numPath = 0
+		totalDis = 0
+		for seed in seeds:
+			paths = nx.shortest_path(initCore, seed)
+			numPath += len(paths)
+			for path in paths:
+				totalDis += len(path)
+		radius = 0.5*float(totalDis)/numPath
+		
+		# reduce the search space by searching only subgraph with a certain depth from seeds
+		nodes = nx.ego_graph(subgraph, seeds[0], radius = radius).nodes()
+		subgraph = initCore.subgraph(nodes)
 		contigCounts = {}
 		for seed in seeds:
-			contigSet = pprc(initCore, seed, alpha)
+			contigSet = pprc(subgraph, seed, alpha)
 			for contig in contigSet:
 				if contig not in contigCounts:
 					contigCounts[contig] = 0
 				contigCounts[contig] += 1
 		contigs = []
 		for contig in contigCounts:
-			if contigCounts[contig] >= 10:
+			if contigCounts[contig] >= 0.5*seedNum:
 				contigs.append(contig)
 		
 		sets[lca] = contigs
@@ -104,7 +117,7 @@ def pprc(G, seed, alpha):
 	S = set()
 	volS = 0.
 	cutS = 0.
-	bestond = 1.
+	bestcond = 1.
 	bestset = sv[0]
 	for p in sv:
 		s = p[0]  # get the vertex
