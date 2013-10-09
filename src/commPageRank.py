@@ -36,9 +36,9 @@ import networkx as nx
 def commPageRank(initCore, seedNodes, options):
 	alpha = options.cpr_alpha
 	tol = 1. - alpha
-	
 	sets = {}
 	for lca in seedNodes:
+		print lca
 		# for each seed set we pick 20 at random
 		seedNum = max(20, len(seedNodes[lca]))
 		seeds = random.sample(seedNodes[lca], seedNum)
@@ -53,9 +53,11 @@ def commPageRank(initCore, seedNodes, options):
 		
 		# reduce the search space by searching only subgraph with a certain depth from seeds
 		nodes = nx.ego_graph(subgraph, seeds[0], radius = radius).nodes()
+		print '#nodes:', len(nodes)
 		subgraph = initCore.subgraph(nodes)
 		contigCounts = {}
 		for seed in seeds:
+			print '\t',seed
 			contigSet = pprc(subgraph, seed, alpha)
 			for contig in contigSet:
 				if contig not in contigCounts:
