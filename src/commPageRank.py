@@ -44,15 +44,23 @@ def commPageRank(initCore, seedNodes, options):
 		seeds = random.sample(seedNodes[lca], seedNum)
 		numPath = 0
 		totalDis = 0
+		centerDis = 1e10
+		centerNode = None
 		for seed in seeds:
 			paths = nx.shortest_path(initCore, seed)
 			numPath += len(paths)
+			sumDis = 0
 			for path in paths:
 				totalDis += len(path)
-		radius = 0.5*float(totalDis)/numPath
+				sumDis += len(path)
+			if sumDis < centerDis:
+				centerDis = sumDis
+				centerNode = seed
 		
+		radius = 0.5*float(totalDis)/numPath
+		print radius
 		# reduce the search space by searching only subgraph with a certain depth from seeds
-		nodes = nx.ego_graph(subgraph, seeds[0], radius = radius).nodes()
+		nodes = nx.ego_graph(subgraph, centerNode, radius = max(5, radius)).nodes()
 		print '#nodes:', len(nodes)
 		subgraph = initCore.subgraph(nodes)
 		contigCounts = {}
