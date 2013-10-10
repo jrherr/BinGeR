@@ -114,7 +114,16 @@ class ContigSpace(nx.Graph):
 		hmmscanFile = projInfo.getHMMScanFile(sample)
 		# read the hmmscan file, and load a lookup dict into hmmscanReg
 		hmmscanReg = readHMMScanTable(hmmscanFile)
-		nx.set_node_attributes(self.graphs[sample], 'HMM', hmmscanReg)
+		contigs = {}
+		for node in self.graphs[sample].nodes():
+			contigs[node] = 1
+			
+		nodeAttr = {}
+		for contig in hmmscanReg:
+			if contig not in contigs:
+				continue
+			nodeAttr[contig] = hmmscanReg[contig]
+		nx.set_node_attributes(self.graphs[sample], 'HMM', nodeAttr)
 	
 	# End of addHMMScanInfoToGraph
 	
