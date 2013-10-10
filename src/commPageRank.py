@@ -86,7 +86,7 @@ def pprc(G, seed, alpha, tol, maxiter):
 	Q.append(seed)
 	iter = 0
 	while len(Q) > 0 and iter <= maxiter:
-		iter += 1:
+		iter += 1
 		v = Q.popleft()
 		if v not in x:
 			x[v] = 0
