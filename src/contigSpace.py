@@ -45,7 +45,6 @@ from scipy.stats import norm
 import phylo
 from taxonomy import TaxonTree
 from commPageRank import commPageRank
-from mcl import mcl
 
 
 ######################## CLASSES ######################
