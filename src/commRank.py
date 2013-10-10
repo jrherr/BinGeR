@@ -41,18 +41,22 @@ def commRank(initCore, seedNodes, options):
 	sortedNodeDegrees = sorted(nodeDegrees.iteritems(), key = lambda x: x[1], reverse = True)
 	
 	# get 85%, 90%, 95% percentile index
+	percentile_60_index = int(len(sortedNodeDegrees) * 0.6)
 	percentile_85_index = int(len(sortedNodeDegrees) * 0.85)
 	percentile_90_index = int(len(sortedNodeDegrees) * 0.9)
 	percentile_95_index = int(len(sortedNodeDegrees) * 0.95)
 	
 	# remove last 5% nodes
-	nodes_to_remove = map( itemgetter(0), sortedNodeDegrees[percentile_95_index:] )
+	nodes_to_remove = map( itemgetter(0), sortedNodeDegrees[percentile_60_index:] )
 	initCore.remove_nodes_from(nodes_to_remove)
 	
 	n = 0
 	for component in nx.connected_components(initCore):
+		if len(component) < 100: continue
 		print len(component)
 		n+=1
 	print '======================'
 	print n
 	return {}
+	
+# End of commRank
