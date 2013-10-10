@@ -44,75 +44,43 @@ def commPageRank(initCore, seedNodes, options):
 		seedNum = max(20, len(seedNodes[lca]))
 		seeds = set(random.sample(seedNodes[lca], seedNum))
 		
-		contigCounts = {}
+		nodes = []
 		for seed in seeds:
 			print seed
 			# reduce the search space by searching only subgraph with a certain depth from seeds
-			nodes = nx.ego_graph(initCore, seed, radius = 6).nodes()
+			nodes += nx.ego_graph(initCore, seed, radius = 6).nodes()
 			print '#nodes:', len(nodes)
-			subgraph = initCore.subgraph(nodes)
-			print 'subgraph extracted'
-			contigSet = pprc(subgraph, seed, alpha, tol, maxiter)
-			for contig in contigSet:
-				if contig not in contigCounts:
-					contigCounts[contig] = 0
-				contigCounts[contig] += 1
-		contigs = []
-		for contig in contigCounts:
-			if contigCounts[contig] >= 0.5*seedNum:
-				contigs.append(contig)
 		
-		sets[lca] = contigs
+		# extract the subgraph
+		subgraph = initCore.subgraph(set(nodes))
+		print 'subgraph extracted'
+		
+		# run pprc here
+		contigSet = pprc(subgraph, seeds, alpha, tol, maxiter)
+		sets[lca] = contigSet
 		
 	return sets
 	
 # end of commPageRank
 
-def pprc(G, seed, alpha, tol, maxiter):
+def pprc(G, seeds, alpha, tol, maxiter):
 	"""
 	This personalized PageRank clustering algorithm was originally designed by
 	David F. Gleich at Purdue University. Here I tweak it to suit the networkx 
 	module and the weighted edge scenario with multiple seeds option.
 	"""
 	
-	
-	"""
-	x = {}
-	r = {}
-	Q = collections.deque()
-	
-	
-	## initialized the seed weights
-	r[seed] = 1
-	Q.append(seed)
-	iter = 0
-	while len(Q) > 0 and iter <= maxiter:
-		iter += 1
-		v = Q.popleft()
-		if v not in x:
-			x[v] = 0
-		x[v] += (1-alpha) * r[v]
-		mass = alpha*r[v]/(2*len(G[v]))
-		
-		for u in G[v]: # for neighbors of v
-			if u not in r:
-				r[u] = 0.
-			if r[u] < G.degree(u, weight = 'weight') * tol and \
-				(r[u] + mass) >= G.degree(u, weight = 'weight') * tol:
-				Q.append(u)
-			r[u] = r[u] + mass
-		r[v] = mass * G.degree(v, weight = 'weight')
-		if r[v] >= G.degree(v, weight = 'weight') * tol:
-			Q.append(v)
-	"""
-	
+
 	Gvol = 2 * len(G.edges())
+	
+	# initialize personalization with seeds
 	personalizationDict = {}
 	for node in G.nodes():
-		if node == seed:
+		if node in seeds:
 			personalizationDict[node] = 1
 		else:
 			personalizationDict[node] = 0
+			
 	pr = nx.pagerank(G, alpha = alpha, max_iter = maxiter, 
 			personalization = personalizationDict, tol = tol, weight = 'weight')
 	
