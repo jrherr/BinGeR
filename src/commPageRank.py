@@ -52,7 +52,7 @@ def commPageRank(initCore, seedNodes, options):
 			print '#nodes:', len(nodes)
 			subgraph = initCore.subgraph(nodes)
 			print 'subgraph extracted'
-			contigSet = pprc(subgraph, seed, alpha, tol)
+			contigSet = pprc(subgraph, seed, alpha, tol, maxiter)
 			for contig in contigSet:
 				if contig not in contigCounts:
 					contigCounts[contig] = 0
