@@ -35,37 +35,24 @@ import networkx as nx
 
 def commPageRank(initCore, seedNodes, options):
 	alpha = options.cpr_alpha
-	tol = 1. - alpha
+	tol = options.cpr_tol
+	maxiter = options.cpr_maxiter
 	sets = {}
 	for lca in seedNodes:
 		print lca
-		"""
 		# for each seed set we pick 20 at random
 		seedNum = max(20, len(seedNodes[lca]))
 		seeds = set(random.sample(seedNodes[lca], seedNum))
-		numPath = 0
-		totalDis = 0
-		centerDis = 1e10
-		centerNode = None
-		distanceMatrix = nx.floyd_warshall_numpy(initCore, seeds)
-		vol = len(seeds)*(len(seeds) - 1)
-		avgDist = distanceMatrix.sum()/vol
-		for seedIndex, row in enumerate(distanceMatrix):
-			if row.sum() < centerDis:
-				centerDis = row.sum()
-				centerNode = seeds[seedIndex]
-		print 'average path length:', avgDist
-		"""
-		# reduce the search space by searching only subgraph with a certain depth from seeds
 		
 		contigCounts = {}
 		for seed in seeds:
 			print seed
-			nodes = nx.ego_graph(subgraph, seed, radius =6).nodes()
+			# reduce the search space by searching only subgraph with a certain depth from seeds
+			nodes = nx.ego_graph(initCore, seed, radius = 6).nodes()
 			print '#nodes:', len(nodes)
 			subgraph = initCore.subgraph(nodes)
 			print 'subgraph extracted'
-			contigSet = pprc(subgraph, seed, alpha)
+			contigSet = pprc(subgraph, seed, alpha, tol)
 			for contig in contigSet:
 				if contig not in contigCounts:
 					contigCounts[contig] = 0
@@ -76,12 +63,12 @@ def commPageRank(initCore, seedNodes, options):
 				contigs.append(contig)
 		
 		sets[lca] = contigs
-	
+		
 	return sets
 	
 # end of commPageRank
 
-def pprc(G, seed, alpha):
+def pprc(G, seed, alpha, tol, maxiter):
 	"""
 	This personalized PageRank clustering algorithm was originally designed by
 	David F. Gleich at Purdue University. Here I tweak it to suit the networkx 
@@ -97,8 +84,9 @@ def pprc(G, seed, alpha):
 	## initialized the seed weights
 	r[seed] = 1
 	Q.append(seed)
-		
-	while len(Q) > 0:
+	iter = 0
+	while len(Q) > 0 and iter <= maxiter:
+		iter += 1:
 		v = Q.popleft()
 		if v not in x:
 			x[v] = 0
@@ -116,6 +104,8 @@ def pprc(G, seed, alpha):
 		if r[v] >= G.degree(v, weight = 'weight') * tol:
 			Q.append(v)
 			
+	sys.stdout.write('Finished init node values.\n')
+	
 	# find cluster 
 	# normalized by weighted degree
 	for v in x:
@@ -141,6 +131,9 @@ def pprc(G, seed, alpha):
 		if cutS/min(volS, Gvol - volS) < bestcond:
 			bestcond = cutS/min(volS, Gvol - volS)
 			bestset = set(S)
+			
+	print "set size: ", len(bestset)
+	
 	return bestset
 	
 # End of pprc

@@ -369,9 +369,25 @@ def main(argv = sys.argv[1:]):
 							help = "Minimum contig length to be considered in Z-score clustering [default: 2000].")
 	
 	
-	clusteringOptions.add_option("--cpr_alpha", type = "float", default = 0.99, metavar = 'FLOAT',
-							help = "The dampening factor, alpha, in community personalized PageRank [default: 0.99].")
+	clusteringOptions.add_option("-d", "--cpr_alpha", type = "float", default = 0.9, metavar = 'FLOAT',
+							help = "The dampening factor, alpha, in community personalized PageRank [default: 0.9, range: (0.75, 0.95)].")
+
+	clusteringOptions.add_option("-e", "--cpr_tol", type = "float", default = 1e-4, metavar = 'FLOAT',
+							help = "The error tolerance factor, tol, in community personalized PageRank [default: 1e-4, range: (1e-8, 1e-2)].")
+
+	clusteringOptions.add_option("-i", "--cpr_maxiter", type = "int", default = 50, metavar = 'INT',
+							help = "The max iterations performed in community personalized PageRank [default: 50, range: (20, 100)].")
+
+"""	
+	clusteringOptions.add_option("-e", "--mcl_expand", type = "float", default = 2., metavar = 'FLOAT',
+							help = "The expanding factor in Markov Clustering (MCL) alogrithm [default: 2, range: (2, 4)].")
 	
+	clusteringOptions.add_option("-i", "--mcl_inflation", type = "float", default = 2., metavar = 'FLOAT',
+							help = "The inflation factor in Markov Clustering (MCL) alogrithm [default: 2, range: (2, 4)].")
+	
+	clusteringOptions.add_option("-w", "--mcl_width", type = "int", default = 5, metavar = 'INT',
+							help = "The step width in Markov Clustering (MCL) alogrithm [default: 5, range(3, 15)].")
+"""	
 	parser.add_option_group(clusteringOptions)
 
 	# runtime settings that could affect the file saving and message printing
@@ -405,11 +421,30 @@ def main(argv = sys.argv[1:]):
 		parser.error("Size of minimum bin size must be in range [1e4, 1e6]bp, you supplied %i" % options.min_core)
 		exit(0)
 	
-	
-	if options.cpr_alpha <= 0.5 or options.cpr_alpha >= 1:
-		parser.error("Community PageRank Alpha must be in range (0.5, 1), you supplied %.3f" % options.cpr_alpha)
+	if options.cpr_alpha < 0.75 or options.cpr_alpha > 0.95:
+		parser.error("Community PageRank Alpha must be a float in range [0.75, 0.95], you supplied %.3f" % options.cpr_alpha)
 		exit(0)
-
+		
+	if options.cpr_tol < 1e-8 or options.cpr_tol > 1e-2:
+		parser.error("Community PageRank tol must be a float in range [1e-8, 1e-2], you supplied %.3f" % options.cpr_tol)
+		exit(0)
+		
+	if options.cpr_maxiter < 20 or options.cpr_maxiter > 100:
+		parser.error("Community PageRank tol must be a float in range [20, 100], you supplied %i" % options.cpr_maxiter)
+		exit(0)
+"""
+	if options.mcl_expand < 2 or options.mcl_expand > 4:
+		parser.error("Markov Clustering Alogrithm expand factor must be a float in range [2, 4], you supplied %.2f" % options.mcl_expand)
+		exit(0)
+		
+	if options.mcl_inflation < 2 or options.mcl_inflation > 4:
+		parser.error("Markov Clustering Alogrithm inflation factor must be a float in range [2, 4], you supplied %.2f" % options.mcl_inflation)
+		exit(0)
+		
+	if options.mcl_width < 3 or options.mcl_width > 15:
+		parser.error("Markov Clustering Alogrithm expand factor must be an integer in range [3, 15], you supplied %i" % options.mcl_width)
+		exit(0)
+"""
 	total_start_time = time()
 	sys.stdout.write("BinGeR started at %s\n"%(ctime()))
 	sys.stdout.flush()
