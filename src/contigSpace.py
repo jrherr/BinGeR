@@ -45,6 +45,7 @@ from scipy.stats import norm
 import phylo
 from taxonomy import TaxonTree
 from commPageRank import commPageRank
+from commRank import commRank
 
 
 ######################## CLASSES ######################
@@ -966,8 +967,8 @@ class ContigSpace(nx.Graph):
 			
 			# refine the graph using community PageRank if necessary
 			if len(seedNodes.keys()) + len(tightNodes.keys()) > 1:
-				sys.stdout.write('Running personalized PageRank algorithms now.\n')
-				contigSets = commPageRank(initCore, seedNodes, options)
+				#sys.stdout.write('Running personalized PageRank algorithms now.\n')
+				contigSets = commRank(initCore, seedNodes, options)
 				for lca in contigSets:
 					coreIndex += 1
 					coreID = str(coreIndex) + '.' + str(lca)
@@ -990,7 +991,7 @@ class ContigSpace(nx.Graph):
 					coreID = str(coreIndex) + '.unknown'
 					
 				self.cores[coreID] = initCore.nodes()
-		
+		exit(0)
 		# clean up self.graphs to release RAM
 		for clusterName in self.graphs:
 			self.graphs[clusterName].clear()
