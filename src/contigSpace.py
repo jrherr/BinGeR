@@ -489,6 +489,8 @@ class ContigSpace(nx.Graph):
 		for seq in SeqIO.parse(afh, "fasta"):
 			tag = seq.id.split(' ')[0]
 			length = len(seq.seq)
+			if length < min(options.minCovLength, options.minZLength):
+				continue
 			contigs.append((tag,{'length':length, 'sample':sample}))
 		
 		afh.close()
@@ -955,6 +957,7 @@ class ContigSpace(nx.Graph):
 		if not options.quiet:
 			sys.stdout.write('Done.\n')
 			
+		exit(0)
 		# go through each initCore and refine them.
 		coreID = 0
 		for coreIndex, initCore in enumerate(initCores):

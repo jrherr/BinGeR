@@ -361,7 +361,7 @@ def main(argv = sys.argv[1:]):
 							help = "Minimum correlation coefficient cutoff for form a link between contigs using coverage profiles [default: 0.95].")
 	
 	clusteringOptions.add_option("--min_zscore_corrcoef", dest = "minZScoreCorrceof",
-							type = "float", default = 0.9, metavar = 'FLOAT',
+							type = "float", default = 0.95, metavar = 'FLOAT',
 							help = "Minimum correlation coefficient cutoff for form a link between contigs using tri-/tetra-nt frequency Z-Score [default: 0.90].")
 						
 	clusteringOptions.add_option("-x", "--zscore_clustering_min_length", dest = "minZLength",
