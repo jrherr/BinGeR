@@ -41,14 +41,14 @@ def commPageRank(initCore, seedNodes, options):
 	for lca in seedNodes:
 		print lca
 		# for each seed set we pick 20 at random
-		seedNum = min(20, len(seedNodes[lca]))
+		seedNum = min(10, len(seedNodes[lca]))
 		seeds = set(random.sample(seedNodes[lca], seedNum))
 		
 		nodes = []
 		for seed in seeds:
 			print seed
 			# reduce the search space by searching only subgraph with a certain depth from seeds
-			nodes += nx.ego_graph(initCore, seed, radius = 6).nodes()
+			nodes += nx.ego_graph(initCore, seed, radius = 5).nodes()
 			print '#nodes:', len(nodes)
 		
 		# extract the subgraph
