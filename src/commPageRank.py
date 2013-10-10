@@ -41,7 +41,7 @@ def commPageRank(initCore, seedNodes, options):
 	for lca in seedNodes:
 		print lca
 		# for each seed set we pick 20 at random
-		seedNum = max(20, len(seedNodes[lca]))
+		seedNum = min(20, len(seedNodes[lca]))
 		seeds = set(random.sample(seedNodes[lca], seedNum))
 		
 		nodes = []
