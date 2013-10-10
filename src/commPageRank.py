@@ -40,20 +40,20 @@ def commPageRank(initCore, seedNodes, options):
 	sets = {}
 	for lca in seedNodes:
 		print lca
-		# for each seed set we pick 20 at random
-		seedNum = min(10, len(seedNodes[lca]))
+		# for each seed set we pick 10 at random
+		seedNum = min(20, len(seedNodes[lca]))
 		seeds = set(random.sample(seedNodes[lca], seedNum))
 		
 		nodes = []
 		for seed in seeds:
 			print seed
 			# reduce the search space by searching only subgraph with a certain depth from seeds
-			nodes += nx.ego_graph(initCore, seed, radius = 5).nodes()
+			nodes += nx.ego_graph(initCore, seed, radius = 4).nodes()
 			print '#nodes:', len(nodes)
 		
 		# extract the subgraph
 		subgraph = initCore.subgraph(set(nodes))
-		print 'subgraph extracted'
+		print 'subgraph extracted, node number:', len(subgraph.nodes())
 		
 		# run pprc here
 		contigSet = pprc(subgraph, seeds, alpha, tol, maxiter)
@@ -82,7 +82,7 @@ def pprc(G, seeds, alpha, tol, maxiter):
 			personalizationDict[node] = 0
 			
 	pr = nx.pagerank(G, alpha = alpha, max_iter = maxiter, 
-			personalization = personalizationDict, tol = tol, weight = 'weight')
+			personalization = personalizationDict, tol = tol)
 	
 	sys.stdout.write('Finished init node values.\n')
 	
