@@ -1012,6 +1012,15 @@ class ContigSpace(nx.Graph):
 
 	############ major function to recruit contigs to cores #############
 	def recruitContigs(self, projInfo, options):
+		# load all contigIDs into a dict with binary values
+		contigIDs = {}
+		for sample in projInfo.samples:
+			assemblyFile = projInfo.getAssemblyFile(sample)
+			afh = open(assemblyFile, 'r')
+			for record in SeqIO.parse(afh, "fasta"):
+				contigIDs[record.name]
+			afh.close()
+		
 		print 'Code under construction\n'
 
 	# End of recruitContigs

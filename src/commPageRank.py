@@ -74,12 +74,13 @@ def pprc(G, seed, alpha, tol, maxiter):
 	David F. Gleich at Purdue University. Here I tweak it to suit the networkx 
 	module and the weighted edge scenario with multiple seeds option.
 	"""
-	tol = 1 - alpha
-	Gvol = 2 * len(G.edges())
 	
+	
+	"""
 	x = {}
 	r = {}
 	Q = collections.deque()
+	
 	
 	## initialized the seed weights
 	r[seed] = 1
@@ -103,16 +104,27 @@ def pprc(G, seed, alpha, tol, maxiter):
 		r[v] = mass * G.degree(v, weight = 'weight')
 		if r[v] >= G.degree(v, weight = 'weight') * tol:
 			Q.append(v)
-			
+	"""
+	
+	Gvol = 2 * len(G.edges())
+	personalizationDict = {}
+	for node in G.nodes():
+		if node == seed:
+			personalizationDict[node] = 1
+		else:
+			personalizationDict[node] = 0
+	pr = nx.pagerank(G, alpha = alpha, max_iter = maxiter, 
+			personalization = personalizationDict, tol = tol, weight = 'weight')
+	
 	sys.stdout.write('Finished init node values.\n')
 	
 	# find cluster 
 	# normalized by weighted degree
-	for v in x:
-		x[v] = x[v]/G.degree(v, weight = 'weight')
+	for v in pr:
+		pr[v] = pr[v]/G.degree(v, weight = 'weight')
 		
 	# sort x's keys by value in decreasing order
-	sv = sorted(x.iteritems(), key = lambda x: x[1], reverse = True)
+	sv = sorted(pr.iteritems(), key = lambda x: x[1], reverse = True)
 	S = set()
 	volS = 0.
 	cutS = 0.
@@ -127,6 +139,8 @@ def pprc(G, seed, alpha, tol, maxiter):
 			else:
 				cutS += 1
 		S.add(s)
+		
+		if Gvol == volS: continue
 		
 		if cutS/min(volS, Gvol - volS) < bestcond:
 			bestcond = cutS/min(volS, Gvol - volS)
