@@ -125,6 +125,7 @@ class ProjectInfo:
 		else:
 			try:
 				os.mkdir(options.out_dir)
+				self.out_dir = os.path.abspath(options.out_dir)
 			except OSError:
 				sys.stderr.write("FATAL: cannot create output directory %s, please make sure you have proper privilege!\n"%options.out_dir)
 				exit(0)
