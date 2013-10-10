@@ -1283,7 +1283,7 @@ def edgesFromZScoreClustering(tri, tetra, columnLabels, threshold):
 	for i in range(len(indexArray[0])):
 		x = indexArray[0][i]
 		y = indexArray[1][i]
-		edges.append((columnLabels[x], columnLabels[y], {'zcorr':1'}))
+		edges.append((columnLabels[x], columnLabels[y], {'zcorr':1}))
 #	sys.stdout.write('edges addd\n')
 	
 	return edges
