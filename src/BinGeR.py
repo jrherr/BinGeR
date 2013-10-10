@@ -445,6 +445,7 @@ def main(argv = sys.argv[1:]):
 		parser.error("Markov Clustering Alogrithm expand factor must be an integer in range [3, 15], you supplied %i" % options.mcl_width)
 		exit(0)
 	"""
+	
 	total_start_time = time()
 	sys.stdout.write("BinGeR started at %s\n"%(ctime()))
 	sys.stdout.flush()

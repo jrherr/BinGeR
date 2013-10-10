@@ -165,7 +165,7 @@ class ContigSpace(nx.Graph):
 
 		edges = edgesFromCoverageClustering(matrix, contigs, thr)
 		
-		self.graphs[sample].add_edges_from(edges, weight = 3)
+		self.graphs[sample].add_edges_from(edges)
 		
 		if not options.quiet:
 			sys.stdout.write('\t%i edges added.\n' % len(edges))
@@ -222,9 +222,9 @@ class ContigSpace(nx.Graph):
 		
 		for e in edges:
 			if self.graphs[sample].has_edge(e[0], e[1]):
-				self.graphs[sample].add_edge(e[0], e[1], weight = 3.5)
+				self.graphs[sample].add_edge(e[0], e[1], zcorr = 1, covcorr = 1)
 			else:
-				self.graphs[sample].add_edge(e[0], e[1], weight = 1.5)
+				self.graphs[sample].add_edge(e[0], e[1], zcorr = 1)
 		
 		if not options.quiet:
 			sys.stdout.write('\t%i edges added.\n' % len(edges))
@@ -721,7 +721,7 @@ class ContigSpace(nx.Graph):
 				clusterNameA = self.getClusterName(edge[0])
 				clusterNameB = self.getClusterName(edge[1])
 			
-				blatEdges.append((clusterNameA, clusterNameB, {'weight':0.1}))
+				blatEdges.append((clusterNameA, clusterNameB, {'blat':1}))
 		
 			# now add these blatEdges into self.graph
 			self.graph.add_edges_from(blatEdges)
@@ -966,7 +966,6 @@ class ContigSpace(nx.Graph):
 		if not options.quiet:
 			sys.stdout.write('Done.\n')
 			
-		exit(0)
 		# go through each initCore and refine them.
 		coreID = 0
 		for coreIndex, initCore in enumerate(initCores):
@@ -974,6 +973,8 @@ class ContigSpace(nx.Graph):
 			# returned seed nodes is a dict keyed by weighted LCA and valued by list of contigIDs
 			
 			pTree = phylo.nodePhylo(coreIndex, initCore, tTree, projInfo, options)
+			
+			continue
 			
 			seedNodes, tightNodes = phylo.strainer(pTree, tTree, projInfo)
 			
@@ -1261,7 +1262,7 @@ def edgesFromCoverageClustering(data, columnLabels, threshold):
 		j = indexArray[1][index]
 		normMinkowski = distance.euclidean(data[i,], data[j,])/np.sqrt(np.dot(data[i,], data[j,]))
 		if normMinkowski < 0.1:
-			edges.append((columnLabels[i], columnLabels[j]))
+			edges.append((columnLabels[i], columnLabels[j], {'covcorr':1}))
 #	sys.stdout.write('corroef done!\n')
 	
 	return edges
@@ -1282,7 +1283,7 @@ def edgesFromZScoreClustering(tri, tetra, columnLabels, threshold):
 	for i in range(len(indexArray[0])):
 		x = indexArray[0][i]
 		y = indexArray[1][i]
-		edges.append((columnLabels[x], columnLabels[y]))
+		edges.append((columnLabels[x], columnLabels[y], {'zcorr':1'}))
 #	sys.stdout.write('edges addd\n')
 	
 	return edges
