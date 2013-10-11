@@ -987,17 +987,14 @@ class ContigSpace(nx.Graph):
 					subcores = commCrunch(initCore, coreIndex, projInfo, options)
 				else:
 					subcores = initCore.copy()
+				
 				"""
-				# iterate over all subcores
-				for core in subcores:
-					coreIDs, contigSets = \
-							commPageRank(core, seedNodes, tightNodes, coreIndex, options)
-					# update the coreIndex
-					coreIndex = newCoreIndex
-					# put the core contigs into self.core	
-					for coreID, contigSet in zip(coreIDs, contigSets):
-						self.cores[coreID] = contigSet
+				# use community personalized PageRank to merge or further split cores
+				contigSets = commPageRank(subcores, coreIndex, seedNodes, tightNodes, options)	
+				for coreID in contigSets:
+					self.cores[coreID] = contigSets[coreID]
 				"""				
+		
 			else:
 				if len(seedNodes.keys()) == 1:
 					lca = seedNodes.keys()[0]

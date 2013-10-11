@@ -37,7 +37,7 @@ import cPickle
 import community
 
 def commCrunch(initCore, coreIndex, projInfo, options):
-	partitionFile = projInfo.out_dir + '/initCores/initCore.' + str(coreIndex+1) + '.partition'
+	partitionFile = projInfo.out_dir + '/initCores/initCore/' + str(coreIndex+1) + '.partition'
 	if os.path.exists(partitionFile):
 		try:
 			if not options.quiet:
