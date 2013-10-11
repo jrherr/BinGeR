@@ -64,7 +64,7 @@ def commCrunch(initCore, options):
 	
 	# split the core
 	subgraphSets = []
-	for indexLeft, indexRight in zip(percentileIndices[:-1], percentileIndices[1:]):
+	for indexRight, indexLeft in zip(percentileIndices[:-1], percentileIndices[1:]):
 		print indexLeft, indexRight
 		nodes_to_remove = map(itemgetter(0), sortedNodeDegrees[indexLeft:indexRight])
 		print '#Nodes to remove:', len(nodes_to_remove)
