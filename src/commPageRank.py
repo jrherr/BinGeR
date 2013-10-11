@@ -51,39 +51,37 @@ def commCrunch(initCore, options):
 			else:
 				weight += 3
 		Core[edge[0]][edge[1]]['weight'] = weight
+	print "built the weight for edges."
 	
 	# sorted nodes using degree in a descending order	
 	nodeDegrees = Core.degree(weight = 'weight')
 	sortedNodeDegrees = sorted(nodeDegrees.iteritems(), key = lambda x: x[1])
-	print set(sortedNodeDegrees)
-	exit(0)
+	degrees = {}
+	for nodeDegree in sortedNodeDegrees:
+		if nodeDegree[1] not in degrees:
+			degrees[nodeDegree[1]] = []
+		degrees[nodeDegree[1]].append(nodeDegree[0])
+	print sorted(degrees.keys())		
 	print 'Node degree sorting done.'
 	
 	# get percentile indices over the sortedNodeDegrees
-	percentileIndices = [int(len(sortedNodeDegrees) * (float(x)/100)) 
-											for x in range(45, 0, -5)]
-	
 	# split the core
-	subgraphSets = []
-	for indexRight, indexLeft in zip(percentileIndices[:-1], percentileIndices[1:]):
-		print indexLeft, indexRight
-		nodes_to_remove = map(itemgetter(0), sortedNodeDegrees[indexLeft:indexRight])
-		print '#Nodes to remove:', len(nodes_to_remove)
+	
+	subgraphs = []
+	for degree in sorted(degrees.keys()):
+		nodes_to_remove = degrees[degree]
+		print 'Degree:', degree, ', # of nodes to remove:', len(nodes_to_remove)
 		Core.remove_nodes_from(nodes_to_remove)
 		subgraphs = []
 		for subgraph in nx.connected_component_subgraphs(Core):
-			subgraphs.append(subgraph.copy())
-		subgraphSets.append(subgraphs)
-		
-	for subgraphs in subgraphSets:
-		print '========='
-		size = []
-		for subgraph in subgraphs:
-			size.appned(len(subgraph.nodes()))
-		print size
-		print len(size)
-		
-	return nx.connected_component_subgraphs(Core)
+			subgraphSize = nx.number_of_nodes(subgraph)
+			if subgraphSize < 1e-4:
+				subgraphs.append(subgraph.copy())
+				Core.remove_nodes_from(subgraph.nodes())
+			elif:
+				pass
+				
+	return subgraphs
 	
 # End of commCrunch
 
