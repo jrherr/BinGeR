@@ -37,8 +37,9 @@ import cPickle
 import community
 
 def commCrunch(initCore, coreIndex, projInfo, options):
+	# pickfile that holds the partition results
 	partitionFile = projInfo.out_dir + '/initCores/initCore.' + str(coreIndex+1) + '.partition'
-	print partitionFile
+	
 	if os.path.exists(partitionFile):
 		try:
 			if not options.quiet:
@@ -49,16 +50,21 @@ def commCrunch(initCore, coreIndex, projInfo, options):
 		except:
 			sys.stderr.write('FATAL: error in unpickling partition file: %s' % partitionFile)
 	
-	if not options.quiet:
-		sys.stdout.write('[initCore %i] Partitioning initCore...\n' % (coreIndex+1))
-	partition = community.best_partition(initCore)
-	pfh = open(partitionFile, 'wb')
-	cPickle.dump(partition, pfh)
-	pfh.close()
+	else:
+		if not options.quiet:
+			sys.stdout.write('[initCore %i] Partitioning initCore...\n' % (coreIndex+1))
+		partition = community.best_partition(initCore)
+		try:
+			pfh = open(partitionFile, 'wb')
+			cPickle.dump(partition, pfh)
+			pfh.close()
+		except:
+			sys.stderr.write('FATAL: error in pickling partition file: %s' % partitionFile)
 	
+	# transform the partition dict into a dict keyed by commID and valued by lists of contigIDs
 	if not options.quiet:
 		sys.stdout.write('[initCore %i] Extracting subgraphs...\n' % (coreIndex+1))
-	# transform the partition dict into a dict keyed by commID and valued by lists of contigIDs
+	
 	contigSet = []
 	for commID in set(partition.values()):
 		contigList = [nodes for nodes in partition.keys() if partition[nodes] == commID]
