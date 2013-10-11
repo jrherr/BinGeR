@@ -972,13 +972,13 @@ class ContigSpace(nx.Graph):
 			# pTree is a taxonomy DiGraph with leaves as lists of blat results.
 			pTree = phylo.nodePhylo(coreIndex, initCore, tTree, projInfo, options)
 			if not options.quiet:
-				sys.stdout.write('[initCore %i] Phylogenetic tree done.\n'%coreIndex)
+				sys.stdout.write('[initCore %i] Phylogenetic tree done.\n'%(coreIndex+1))
 			
 			# seedNodes is a dict keyed by lca taxonID and valued by lists of contigs
 			# belonging to it.
 			seedNodes, tightNodes = phylo.strainer(pTree, tTree, projInfo)
 			if not options.quiet:
-				sys.stdout.write('[initCore %i] Seeding done.\n'%coreIndex)
+				sys.stdout.write('[initCore %i] Seeding done.\n'%(coreIndex+1))
 			
 			# refine the graph using community PageRank if necessary
 			if len(seedNodes.keys()) + len(tightNodes.keys()) > 1:

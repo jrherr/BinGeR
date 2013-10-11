@@ -56,6 +56,7 @@ def commCrunch(initCore, options):
 	nodeDegrees = Core.degree(weight = 'weight')
 	sortedNodeDegrees = sorted(nodeDegrees.iteritems(), 
 						key = lambda x: x[1], reverse = True)
+	print 'Node degree sorting done.'
 	
 	# get percentile indices over the sortedNodeDegrees
 	percentileIndices = [int(len(sortedNodeDegrees) * (float(x)/100)) 
@@ -65,6 +66,7 @@ def commCrunch(initCore, options):
 	subgraphSets = []
 	for indexLeft, indexRight in zip(percentileIndices[:-1], percentileIndices[1:]):
 		nodes_to_remove = map(itemgetter(0), sortedNodeDegrees[indexLeft:indexRight])
+		print len(nodes_to_remove)
 		Core.remove_nodes_from(nodes_to_remove)
 		subgraphs = []
 		for subgraph in nx.connected_component_subgraphs(Core):
