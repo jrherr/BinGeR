@@ -268,8 +268,7 @@ class ProjectInfo:
 		# check if db/ has every file needed.
 		sys.stdout.write("Checking db files...\n")
 		db_dir = os.path.abspath(sys.argv[0]).replace('bin/BinGeR.py', 'db/')
-		dbs = ['HMM.txt', 'ncbiNodes.lib','ncbiSciNames.lib', 
-				'singleCopy.prot.tar.gz', 'singleCopy.nuc.tar.gz']
+		dbs = ['HMM.txt', 'ncbiNodes.lib','ncbiSciNames.lib', 'singleCopy.prot.tar.gz']
 		dbFiles = [db_dir + filename for filename in dbs]
 		for dbFile in dbFiles:
 			if not os.path.exists(dbFile):
@@ -279,8 +278,7 @@ class ProjectInfo:
 		self.DBs['HMM'] = dbFiles[0]
 		self.DBs['ncbiNodes'] = dbFiles[1]
 		self.DBs['ncbiSciNames'] = dbFiles[2]
-		self.DBs['nuc'] = dbFiles[3]
-		self.DBs['prot'] = dbFiles[4]
+		self.DBs['prot'] = dbFiles[3]
 		sys.stdout.write("Done. Everything looks fine.\n")
 		
 		

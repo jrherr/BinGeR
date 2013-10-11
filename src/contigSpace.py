@@ -937,18 +937,11 @@ class ContigSpace(nx.Graph):
 		if not options.quiet:
 			sys.stdout.write('Now preparing single copy genes...\n')
 		try:
-			nucTar = tarfile.open(projInfo.DBs['nuc'], 'r')
 			protTar = tarfile.open(projInfo.DBs['prot'], 'r')
 		except:
 			sys.stderr.write('FATAL: failure in opening tarfile.\n')
 			exit(0)
 		
-		try:
-			nucTar.extractall(path = projInfo.out_dir)
-		except:		
-			sys.stderr.write('FATAL: failure in extracting single copy genes nucleotide sequences.\n')
-			exit(0)
-			
 		try:
 			protTar.extractall(path = projInfo.out_dir)
 		except:		
@@ -978,10 +971,14 @@ class ContigSpace(nx.Graph):
 			
 			# pTree is a taxonomy DiGraph with leaves as lists of blat results.
 			pTree = phylo.nodePhylo(coreIndex, initCore, tTree, projInfo, options)
+			if not options.quiet:
+				sys.stdout.write('[initCore %i] Phylogenetic tree done.\n'%coreIndex)
 			
 			# seedNodes is a dict keyed by lca taxonID and valued by lists of contigs
 			# belonging to it.
 			seedNodes, tightNodes = phylo.strainer(pTree, tTree, projInfo)
+			if not options.quiet:
+				sys.stdout.write('[initCore %i] Seeding done.\n'%coreIndex)
 			
 			# refine the graph using community PageRank if necessary
 			if len(seedNodes.keys()) + len(tightNodes.keys()) > 1:
@@ -990,7 +987,7 @@ class ContigSpace(nx.Graph):
 				"""
 				# iterate over all subcores
 				for core in subcores:
-					coreIDs, newCoreIndex, contigSets = \
+					coreIDs, contigSets = \
 							commPageRank(core, seedNodes, tightNodes, coreIndex, options)
 					# update the coreIndex
 					coreIndex = newCoreIndex
@@ -999,15 +996,14 @@ class ContigSpace(nx.Graph):
 						self.cores[coreID] = contigSet
 				"""				
 			else:
-				coreIndex += 1
 				if len(seedNodes.keys()) == 1:
 					lca = seedNodes.keys()[0]
-					coreID = str(coreIndex) + '.' + str(lca) + '.regular'
+					coreID = str(coreIndex) + '.1.' + str(lca) + '.regular'
 				elif len(tightNodes.keys()) == 1:
 					lca = tightNodes.keys()[0]
-					coreID = str(coreIndex) + '.' + str(lca) + '.compact'
+					coreID = str(coreIndex) + '.1.' + str(lca) + '.compact'
 				else:
-					coreID = str(coreIndex) + '.0.unknown'
+					coreID = str(coreIndex) + '.1.0.unknown'
 				# put the core contigs into self.core
 				self.cores[coreID] = initCore.nodes()
 				

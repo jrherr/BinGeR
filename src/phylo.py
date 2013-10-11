@@ -91,7 +91,6 @@ def getEndNodes(pTree, root):
 #End of getEndNodes
 
 def nodePhylo(index, G, tTree, projInfo, options):
-	nuc_dir = projInfo.out_dir + '/genes.nuc.clustered/'
 	prot_dir = projInfo.out_dir + '/genes.prot.clustered/'
 	trans = maketrans('ACGTacgt', 'TGCAtgca')
 	
