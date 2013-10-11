@@ -34,37 +34,51 @@ import collections
 import networkx as nx
 from operator import itemgetter
 
-def commCrunch(initCore, options):
+def commCrunch(initCore, expectedNum, options):
 	# make a local copy of the input initCore
 	Core = initCore.copy()
 	
 	# get weighted node degrees for each node
-	weight = {}
 	for edge in Core.edges(data = True):
-		print edge
-	return {}
-	nodeDegrees = Core.degree(weight = 'weight')
+		weight = 0
+		if 'covcorr' in edge[2]:
+			weight += 1
+		if 'zcorr' in edge[2]:
+			weight += 1
+		if 'alignLength' in edge[2]:
+			if edge[2]['alignLength'] < 1000:
+				weight += 2
+			else:
+				weight += 3
+		Core[edge[0]][edge[1]]['weight'] = weight
 	
-	# sorted nodes using degree in a descending order
-	sortedNodeDegrees = sorted(nodeDegrees.iteritems(), key = lambda x: x[1], reverse = True)
+	# sorted nodes using degree in a descending order	
+	nodeDegrees = Core.degree(weight = 'weight')
+	sortedNodeDegrees = sorted(nodeDegrees.iteritems(), 
+						key = lambda x: x[1], reverse = True)
 	
 	# get percentile indices over the sortedNodeDegrees
-	percentileIndices = [int(len(sortedNodeDegrees) * (float(x)/100)) for x in range(5, 100, 5)]
+	percentileIndices = [int(len(sortedNodeDegrees) * (float(x)/100)) 
+											for x in range(45, 0, -5)]
 	
-	# remove last 5% nodes
-	nodes_to_remove = map( itemgetter(0), sortedNodeDegrees[percentile_60_index:] )
-	initCore.remove_nodes_from(nodes_to_remove)
+	# split the core
+	for index in percentileIndices:
+		print index
+		print '===================='
+		nodes_to_remove = map( itemgetter(0), sortedNodeDegrees[index:] )
+		Core.remove_nodes_from(nodes_to_remove)
+		number_of_cores = []
+		for component in nx.connected_components(Core):
+			if len(component) > 10:
+				number_of_cores.append(len(component))
+		print number_of_cores
+		print len(number_of_cores)
+		print '====================='
+			
 	
-	n = 0
-	for component in nx.connected_components(initCore):
-		if len(component) < 100: continue
-		print len(component)
-		n+=1
-	print '======================'
-	print n
-	return {}
+	return nx.connected_component_subgraphs(Core)
 	
-# End of commRank
+# End of commCrunch
 
 def commPageRank(core, seedNodes, tightNodes, coreIndex, options):
 	if not options.quiet:
