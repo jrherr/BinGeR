@@ -33,7 +33,7 @@ setup(
 	description = 'BinGeR (Binner for Genome Recovery): \
 		in-situ Genome recovery tool for series metagenomes',
 	
-	scripts = ['src/BinGeR.py', 'src/contigSpace.py', 'src/commRank.py',
+	scripts = ['src/BinGeR.py', 'src/contigSpace.py',
 				'src/commPageRank.py', 'src/taxonomy.py',
 				'src/utilities.py', 'src/phylo.py'],
 	
