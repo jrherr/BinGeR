@@ -54,8 +54,9 @@ def commCrunch(initCore, options):
 	
 	# sorted nodes using degree in a descending order	
 	nodeDegrees = Core.degree(weight = 'weight')
-	sortedNodeDegrees = sorted(nodeDegrees.iteritems(), 
-						key = lambda x: x[1], reverse = True)
+	sortedNodeDegrees = sorted(nodeDegrees.iteritems(), key = lambda x: x[1])
+	print set(sortedNodeDegrees)
+	exit(0)
 	print 'Node degree sorting done.'
 	
 	# get percentile indices over the sortedNodeDegrees
