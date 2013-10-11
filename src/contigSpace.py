@@ -78,7 +78,6 @@ class ContigSpace(nx.Graph):
 		try:
 			return self.coreLookup[x][1]
 		except KeyError, IndexError:
-			sys.stderr.write('Error: cannot find the length for %s\n'%x)
 			return -1
 	
 	# End of getContigLength
@@ -676,7 +675,7 @@ class ContigSpace(nx.Graph):
 						lengthB = self.getContigLength(contigB)
 						if lengthA == -1 or lengthB == -1:
 							continue
-						self.bridges.add_edge(link)
+						self.bridges.add_edge(contigA, contigB, link[2])
 						if contigA not in node_attributes:
 							node_attributes[contigA] = lengthA
 						if contigB not in node_attributes:
