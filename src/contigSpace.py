@@ -983,7 +983,10 @@ class ContigSpace(nx.Graph):
 			# refine the graph using community PageRank if necessary
 			if len(seedNodes.keys()) + len(tightNodes.keys()) > 1:
 				# split the initCore first
-				subcores = commCrunch(initCore, options)
+				if nx.number_of_nodes(initCore) > 1e-4:
+					subcores = commCrunch(initCore, options)
+				else:
+					subcores = initCore.copy()
 				"""
 				# iterate over all subcores
 				for core in subcores:

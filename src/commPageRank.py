@@ -33,6 +33,7 @@ import random
 import collections
 import networkx as nx
 from operator import itemgetter
+import community
 
 def commCrunch(initCore, options):
 	# make a local copy of the input initCore
@@ -78,7 +79,7 @@ def commCrunch(initCore, options):
 			if subgraphSize < 1e-4:
 				subgraphs.append(subgraph.copy())
 				Core.remove_nodes_from(subgraph.nodes())
-			elif:
+			else:
 				pass
 				
 	return subgraphs
