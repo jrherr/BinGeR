@@ -984,7 +984,7 @@ class ContigSpace(nx.Graph):
 			if len(seedNodes.keys()) + len(tightNodes.keys()) > 1:
 				# split the initCore first
 				if nx.number_of_nodes(initCore) > 1e-4:
-					subcores = commCrunch(initCore, options)
+					subcores = commCrunch(initCore, coreIndex, projInfo, options)
 				else:
 					subcores = initCore.copy()
 				"""

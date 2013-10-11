@@ -33,56 +33,46 @@ import random
 import collections
 import networkx as nx
 from operator import itemgetter
+import cPickle
 import community
 
-def commCrunch(initCore, options):
-	# make a local copy of the input initCore
-	Core = initCore.copy()
+def commCrunch(initCore, coreIndex, projInfo, options):
+	partitionFile = projInfo.out_dir + '/initCores/initCore.' + str(coreIndex+1) + '.partition'
+	if os.path.exists(partitionFile):
+		try:
+			if not options.quiet:
+				sys.stdout.write('[initCore %i] Loading partitions...\n'%(coreIndex+1))
+			pfh = open(partitionFile, 'rb')
+			partition = cPickle.load(pfh)
+			pfh.close()
+		except:
+			sys.stderr.write('FATAL: error in unpickling partition file: %s' % partitionFile)
 	
-	# get weighted node degrees for each node
-	for edge in Core.edges(data = True):
-		weight = 0
-		if 'covcorr' in edge[2]:
-			weight += 1
-		if 'zcorr' in edge[2]:
-			weight += 1
-		if 'alignLength' in edge[2]:
-			if edge[2]['alignLength'] < 1000:
-				weight += 2
-			else:
-				weight += 3
-		Core[edge[0]][edge[1]]['weight'] = weight
-	print "built the weight for edges."
+	if not options.quiet:
+		sys.stdout.write('[initCore %i] Partitioning initCore...\n' % (coreIndex+1))
+	partition = community.best_partition(initCore)
+	pfh = open(partitionFile, 'wb')
+	cPickle.dump(partition, pfh)
+	pfh.close()
 	
-	# sorted nodes using degree in a descending order	
-	nodeDegrees = Core.degree(weight = 'weight')
-	sortedNodeDegrees = sorted(nodeDegrees.iteritems(), key = lambda x: x[1])
-	degrees = {}
-	for nodeDegree in sortedNodeDegrees:
-		if nodeDegree[1] not in degrees:
-			degrees[nodeDegree[1]] = []
-		degrees[nodeDegree[1]].append(nodeDegree[0])
-	print sorted(degrees.keys())		
-	print 'Node degree sorting done.'
+	if not options.quiet:
+		sys.stdout.write('[initCore %i] Extracting subgraphs...\n' % (coreIndex+1))
+	# transform the partition dict into a dict keyed by commID and valued by lists of contigIDs
+	contigSet = []
+	for commID in set(partition.values()):
+		contigList = [nodes for nodes in partition.keys() if partition[nodes] == commID]
+		contigSet.append(contigList)
 	
-	# get percentile indices over the sortedNodeDegrees
-	# split the core
-	
+	# get the subgraphs
 	subgraphs = []
-	for degree in sorted(degrees.keys()):
-		nodes_to_remove = degrees[degree]
-		print 'Degree:', degree, ', # of nodes to remove:', len(nodes_to_remove)
-		Core.remove_nodes_from(nodes_to_remove)
-		subgraphs = []
-		for subgraph in nx.connected_component_subgraphs(Core):
-			subgraphSize = nx.number_of_nodes(subgraph)
-			if subgraphSize < 1e-4:
-				subgraphs.append(subgraph.copy())
-				Core.remove_nodes_from(subgraph.nodes())
-			else:
-				pass
-				
-	return subgraphs
+	for contigList in contigSet:
+		subgraph = initCore.subgraph(contigList)
+		subgraphs.append(subgraph.copy())
+		
+	if not options.quiet:
+		sys.stdout.write('[initCore %i] Done.\n' % (coreIndex+1))
+		
+	return subgraph
 	
 # End of commCrunch
 
