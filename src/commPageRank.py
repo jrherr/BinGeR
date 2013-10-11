@@ -37,7 +37,8 @@ import cPickle
 import community
 
 def commCrunch(initCore, coreIndex, projInfo, options):
-	partitionFile = projInfo.out_dir + '/initCores/initCore/' + str(coreIndex+1) + '.partition'
+	partitionFile = projInfo.out_dir + '/initCores/initCore/initCore.' + \ 
+						str(coreIndex+1) + '.partition'
 	if os.path.exists(partitionFile):
 		try:
 			if not options.quiet:
@@ -76,7 +77,7 @@ def commCrunch(initCore, coreIndex, projInfo, options):
 	
 # End of commCrunch
 
-def commPageRank(core, seedNodes, tightNodes, coreIndex, options):
+def commPageRank(cores, coreIndex, seedNodes, tightNodes, options):
 	if not options.quiet:
 		sys.stdout.write('Running community personalized PageRank to evaluate the core set.\n')
 		
