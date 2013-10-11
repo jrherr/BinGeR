@@ -44,9 +44,7 @@ from scipy.stats import norm
 
 import phylo
 from taxonomy import TaxonTree
-from commPageRank import commPageRank
-from commRank import commRank
-
+from commPageRank import commPageRank, commCrunch
 
 ######################## CLASSES ######################
 class ContigSpace(nx.Graph):
@@ -978,38 +976,41 @@ class ContigSpace(nx.Graph):
 			# get the taxonomy affiliation
 			# returned seed nodes is a dict keyed by weighted LCA and valued by list of contigIDs
 			
+			# pTree is a taxonomy DiGraph with leaves as lists of blat results.
 			pTree = phylo.nodePhylo(coreIndex, initCore, tTree, projInfo, options)
 			
-			continue
-			
+			# seedNodes is a dict keyed by lca taxonID and valued by lists of contigs
+			# belonging to it.
 			seedNodes, tightNodes = phylo.strainer(pTree, tTree, projInfo)
 			
 			# refine the graph using community PageRank if necessary
 			if len(seedNodes.keys()) + len(tightNodes.keys()) > 1:
-				#sys.stdout.write('Running personalized PageRank algorithms now.\n')
-				contigSets = commRank(initCore, seedNodes, options)
-				for lca in contigSets:
-					coreIndex += 1
-					coreID = str(coreIndex) + '.' + str(lca)
-					self.cores[coreID] = contigSets
-				
-				if len(tightNodes) != 0:
-					tightContigSets = commPageRank(initCore, tightNodes, options)
-					for lca in contigSets:
-						coreIndex += 1
-						coreID = str(coreIndex) + '.' + str(lca) + '.compact'
+				# split the initCore first
+				subcores = commCrunch(initCore, options)
+				"""
+				# iterate over all subcores
+				for core in subcores:
+					coreIDs, newCoreIndex, contigSets = \
+							commPageRank(core, seedNodes, tightNodes, coreIndex, options)
+					# update the coreIndex
+					coreIndex = newCoreIndex
+					# put the core contigs into self.core	
+					for coreID, contigSet in zip(coreIDs, contigSets):
+						self.cores[coreID] = contigSet
+				"""				
 			else:
 				coreIndex += 1
 				if len(seedNodes.keys()) == 1:
 					lca = seedNodes.keys()[0]
-					coreID = str(coreIndex) + '.' + str(lca)
+					coreID = str(coreIndex) + '.' + str(lca) + '.regular'
 				elif len(tightNodes.keys()) == 1:
 					lca = tightNodes.keys()[0]
-					coreID = str(coreIndex) + '.' + str(lca)
+					coreID = str(coreIndex) + '.' + str(lca) + '.compact'
 				else:
-					coreID = str(coreIndex) + '.unknown'
-					
+					coreID = str(coreIndex) + '.0.unknown'
+				# put the core contigs into self.core
 				self.cores[coreID] = initCore.nodes()
+				
 		exit(0)
 		# clean up self.graphs to release RAM
 		for clusterName in self.graphs:

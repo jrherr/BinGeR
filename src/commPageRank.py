@@ -32,11 +32,52 @@ import os
 import random
 import collections
 import networkx as nx
+from operator import itemgetter
 
-def commPageRank(initCore, seedNodes, options):
+def commCrunch(initCore, options):
+	# make a local copy of the input initCore
+	Core = initCore.copy()
+	
+	# get weighted node degrees for each node
+	weight = {}
+	for node in Core.nodes(data = True):
+		print node
+	return {}
+	nodeDegrees = Core.degree(weight = 'weight')
+	
+	# sorted nodes using degree in a descending order
+	sortedNodeDegrees = sorted(nodeDegrees.iteritems(), key = lambda x: x[1], reverse = True)
+	
+	# get percentile indices over the sortedNodeDegrees
+	percentileIndices = []
+	percentile_60_index = int(len(sortedNodeDegrees) * 0.6)
+	percentile_85_index = int(len(sortedNodeDegrees) * 0.85)
+	percentile_90_index = int(len(sortedNodeDegrees) * 0.9)
+	percentile_95_index = int(len(sortedNodeDegrees) * 0.95)
+	
+	# remove last 5% nodes
+	nodes_to_remove = map( itemgetter(0), sortedNodeDegrees[percentile_60_index:] )
+	initCore.remove_nodes_from(nodes_to_remove)
+	
+	n = 0
+	for component in nx.connected_components(initCore):
+		if len(component) < 100: continue
+		print len(component)
+		n+=1
+	print '======================'
+	print n
+	return {}
+	
+# End of commRank
+
+def commPageRank(core, seedNodes, tightNodes, coreIndex, options):
+	if not options.quiet:
+		sys.stdout.write('Running community personalized PageRank to evaluate the core set.\n')
+		
 	alpha = options.cpr_alpha
 	tol = options.cpr_tol
 	maxiter = options.cpr_maxiter
+	
 	sets = {}
 	for lca in seedNodes:
 		print lca
