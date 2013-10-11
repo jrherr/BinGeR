@@ -905,8 +905,8 @@ class ContigSpace(nx.Graph):
 					nodeA = edge[0]
 					nodeB = edge[1]
 					if coreGraph.has_node(nodeA) and coreGraph.has_node(nodeB):
-						weight = edge[2]['weight']
-						blatEdges.append((nodeA, nodeB, {'weight':weight}))
+						weight = edge[2]['alignLength']
+						blatEdges.append((nodeA, nodeB, {'alignLength':weight}))
 				
 				coreGraph.add_edges_from(blatEdges)
 				self.bridges.remove_edges_from(blatEdges)
