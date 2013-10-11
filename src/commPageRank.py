@@ -65,8 +65,9 @@ def commCrunch(initCore, options):
 	# split the core
 	subgraphSets = []
 	for indexLeft, indexRight in zip(percentileIndices[:-1], percentileIndices[1:]):
+		print indexLeft, indexRight
 		nodes_to_remove = map(itemgetter(0), sortedNodeDegrees[indexLeft:indexRight])
-		print len(nodes_to_remove)
+		print '#Nodes to remove:', len(nodes_to_remove)
 		Core.remove_nodes_from(nodes_to_remove)
 		subgraphs = []
 		for subgraph in nx.connected_component_subgraphs(Core):
