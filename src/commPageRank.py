@@ -34,7 +34,7 @@ import collections
 import networkx as nx
 from operator import itemgetter
 
-def commCrunch(initCore, expectedNum, options):
+def commCrunch(initCore, options):
 	# make a local copy of the input initCore
 	Core = initCore.copy()
 	
@@ -62,20 +62,23 @@ def commCrunch(initCore, expectedNum, options):
 											for x in range(45, 0, -5)]
 	
 	# split the core
-	for index in percentileIndices:
-		print index
-		print '===================='
-		nodes_to_remove = map( itemgetter(0), sortedNodeDegrees[index:] )
+	subgraphSets = []
+	for indexLeft, indexRight in zip(percentileIndices[:-1], percentileIndices[1:]):
+		nodes_to_remove = map(itemgetter(0), sortedNodeDegrees[indexLeft:indexRight])
 		Core.remove_nodes_from(nodes_to_remove)
-		number_of_cores = []
-		for component in nx.connected_components(Core):
-			if len(component) > 10:
-				number_of_cores.append(len(component))
-		print number_of_cores
-		print len(number_of_cores)
-		print '====================='
-			
-	
+		subgraphs = []
+		for subgraph in nx.connected_component_subgraphs(Core):
+			subgraphs.append(subgraph.copy())
+		subgraphSets.append(subgraphs)
+		
+	for subgraphs in subgraphSets:
+		print '========='
+		size = []
+		for subgraph in subgraphs:
+			size.appned(len(subgraph.nodes()))
+		print size
+		print len(size)
+		
 	return nx.connected_component_subgraphs(Core)
 	
 # End of commCrunch
