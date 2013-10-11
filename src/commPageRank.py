@@ -40,8 +40,8 @@ def commCrunch(initCore, options):
 	
 	# get weighted node degrees for each node
 	weight = {}
-	for node in Core.nodes(data = True):
-		print node
+	for edge in Core.edges(data = True):
+		print edge
 	return {}
 	nodeDegrees = Core.degree(weight = 'weight')
 	
@@ -49,11 +49,7 @@ def commCrunch(initCore, options):
 	sortedNodeDegrees = sorted(nodeDegrees.iteritems(), key = lambda x: x[1], reverse = True)
 	
 	# get percentile indices over the sortedNodeDegrees
-	percentileIndices = []
-	percentile_60_index = int(len(sortedNodeDegrees) * 0.6)
-	percentile_85_index = int(len(sortedNodeDegrees) * 0.85)
-	percentile_90_index = int(len(sortedNodeDegrees) * 0.9)
-	percentile_95_index = int(len(sortedNodeDegrees) * 0.95)
+	percentileIndices = [int(len(sortedNodeDegrees) * (float(x)/100)) for x in range(5, 100, 5)]
 	
 	# remove last 5% nodes
 	nodes_to_remove = map( itemgetter(0), sortedNodeDegrees[percentile_60_index:] )
