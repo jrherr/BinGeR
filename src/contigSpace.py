@@ -77,10 +77,9 @@ class ContigSpace(nx.Graph):
 	def getContigLength(self, x):
 		try:
 			return self.coreLookup[x][1]
-			sys.stderr.write('Error: cannot find the length for %s\n'%x)
-			exit(0)
 		except KeyError, IndexError:
 			sys.stderr.write('Error: cannot find the length for %s\n'%x)
+			return -1
 	
 	# End of getContigLength
 	
@@ -168,7 +167,7 @@ class ContigSpace(nx.Graph):
 		self.graphs[sample].add_edges_from(edges)
 		
 		if not options.quiet:
-			sys.stdout.write('\t%i edges added.\n' % len(edges))
+			sys.stdout.write('[%s] %i edges added.\n' % (sample, len(edges)))
 			
 		edges = []
 		
@@ -227,7 +226,7 @@ class ContigSpace(nx.Graph):
 				self.graphs[sample].add_edge(e[0], e[1], zcorr = 1)
 		
 		if not options.quiet:
-			sys.stdout.write('\t%i edges added.\n' % len(edges))
+			sys.stdout.write('[%s] %i edges added.\n' % (sample, len(edges)))
 			
 		edges = []
 		
@@ -670,12 +669,20 @@ class ContigSpace(nx.Graph):
 			for sampleA in blatEdges:
 				for sampleB in blatEdges[sampleA]:
 					links = blatEdges[sampleA][sampleB]
-					self.bridges.add_edges_from(links)
-		
+					for link in links:
+						contigA = link[0]
+						contigB = link[1]
+						lengthA = self.getContigLength(contigA)
+						lengthB = self.getContigLength(contigB)
+						if lengthA == -1 or lengthB == -1:
+							continue
+						self.bridges.add_edge(link)
+						if contigA not in node_attributes:
+							node_attributes[contigA] = lengthA
+						if contigB not in node_attributes:
+							node_attributes[contigB] = lengthB
+								
 			# add nodes attribute(length) to the bridges
-			for node in self.bridges.nodes():
-				length = self.getContigLength(node)
-				node_attributes[node] = length
 			nx.set_node_attributes(self.bridges, 'length', node_attributes)
 		
 			"""
@@ -1131,7 +1138,7 @@ def generateBlatEdgePickle(projInfo, options):
 		logfile = blatDir+'/'+combination[0]+'.vs.'+combination[1]+'.log'
 		query = projInfo.getAssemblyFile(combination[0])
 		db = projInfo.getAssemblyFile(combination[1])
-		blatCMD = [blat, db, query, "-out=psl", "-noHead", "-fastMap", "-minIdentity=95", outfile, logfile]
+		blatCMD = [blat, db, query, "-out=psl", "-noHead", "-minIdentity=95", outfile, logfile]
 		blatCMDs.append(blatCMD)
 
 	if len(blatCMDs) > 0:	
@@ -1189,7 +1196,7 @@ def generateBlatEdgePickle(projInfo, options):
 					weight = 2.5
 				elif alignLength >= 3000:
 					weight = 3
-				links[sampleB][sampleA].append((qName, tName, {'weight': weight, 'alignLength':alignLength}))
+				links[sampleB][sampleA].append((qName, tName, {'alignLength':alignLength}))
 			else:                            # otherwise, it could be sideways alignment
 				q5Edge = qStart - 1
 				q3Edge = qSize - qEnd + 1
@@ -1206,7 +1213,7 @@ def generateBlatEdgePickle(projInfo, options):
 						weight = 2.5
 					elif alignLength >= 3000:
 						weight = 3
-					links[sampleB][sampleA].append((qName, tName, {'weight': weight, 'alignLength':alignLength}))	
+					links[sampleB][sampleA].append((qName, tName, {'alignLength':alignLength}))	
 
 		bfh.close()
 			
@@ -1253,7 +1260,7 @@ def edgesFromCoverageClustering(data, columnLabels, threshold):
 	corrcoef = np.corrcoef(data)
 	# select elements that passed corrcoef thr
 	indexArray = np.where(corrcoef > threshold)
-	sys.stdout.write('%i pre-edges...\n'%len(indexArray[0]))
+
 	# calculate normed distance
 	# form a new np.array first to reduce computational cost
 	
