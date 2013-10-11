@@ -1138,8 +1138,7 @@ def generateBlatEdgePickle(projInfo, options):
 		logfile = blatDir+'/'+combination[0]+'.vs.'+combination[1]+'.log'
 		query = projInfo.getAssemblyFile(combination[0])
 		db = projInfo.getAssemblyFile(combination[1])
-		blatCMD = [blat, db, query, "-out=psl", "-noHead", "-minIdentity=95", outfile, logfile]
-		print blatCMD
+		blatCMD = [blat, db, query, "-out=psl", "-fastMap", "-noHead", "-minIdentity=95", outfile, logfile]
 		blatCMDs.append(blatCMD)
 
 	if len(blatCMDs) > 0:	
