@@ -173,15 +173,17 @@ def pprc(G, seeds, alpha, tol, maxiter):
 	try:		
 		pr = nx.pagerank(G, alpha = alpha, max_iter = maxiter, 
 				personalization = personalizationDict, tol = tol)
-	except nx.exception.networkXError:
+	
+	except nx.exception.networkXError:	
 		pr = {}
 		r = {}
 		Q = collections.deque()
 		for s in seeds:
 			r[s] = 1/len(seeds)
 			Q.append(s)
-		iter = 0
-		when len(Q) > 0 and iter <= maxiter:
+			
+		iterNum = 0
+		when len(Q) > 0 and iterNum <= maxiter:
 			v = Q.popleft()
 			if v not in pr:
 				pr[v] = 0
@@ -196,9 +198,9 @@ def pprc(G, seeds, alpha, tol, maxiter):
 			r[v] = mass*len(G[v])
 			if r[v] >= len(G[v])*tol:
 				Q.append(v)
-			iter += 1
+			iterNum += 1
 		
-	sys.stdout.write('Finished init node values.\n')
+	# sys.stdout.write('Finished init node values.\n')
 	
 	# find cluster 
 	# normalized by weighted degree
