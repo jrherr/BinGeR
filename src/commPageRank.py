@@ -142,6 +142,8 @@ def commPageRank(cores, coreIndex, seedNodes, tightNodes, options):
 				for lca in seeds:
 					contigs = pprc(core, seeds[lca], alpha, tol, maxiter)
 					print lca, contigs
+					if lca not in tempSets:
+						tempSets[lca] = []
 					tempSets[lca].append(contigs)
 	
 	
