@@ -183,7 +183,7 @@ def pprc(G, seeds, alpha, tol, maxiter):
 			Q.append(s)
 			
 		iterNum = 0
-		when len(Q) > 0 and iterNum <= maxiter:
+		while len(Q) > 0 and iterNum <= maxiter:
 			v = Q.popleft()
 			if v not in pr:
 				pr[v] = 0
