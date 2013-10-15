@@ -188,7 +188,7 @@ def pprc(G, seeds, alpha, tol, maxiter):
 			if v not in pr:
 				pr[v] = 0
 			pr[v] += (1-alpha)*r[v]
-			mass = alpha*r[v]/*(2*len(G[v]))
+			mass = alpha*r[v]/(2*len(G[v]))
 			for u in G[v]:
 				if u not in r:
 					r[u] = 0.
