@@ -976,7 +976,12 @@ class ContigSpace(nx.Graph):
 			
 			# seedNodes is a dict keyed by lca taxonID and valued by lists of contigs
 			# belonging to it.
-			seedNodes, tightNodes = phylo.strainer(pTree, tTree, projInfo)
+			try:
+				seedNodes, tightNodes = phylo.strainer(pTree, tTree, projInfo)
+			except ValueError:
+				seedNodes = {}
+				tightNodes = {}
+				
 			if not options.quiet:
 				sys.stdout.write('[initCore %i] Seeding done.\n'%(coreIndex+1))
 			
