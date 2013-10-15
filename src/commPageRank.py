@@ -91,27 +91,60 @@ def commPageRank(cores, coreIndex, seedNodes, tightNodes, options):
 	tol = options.cpr_tol
 	maxiter = options.cpr_maxiter
 	
-	sets = {}
+	# create node->lca mapping for seeds
+	nodeMap = {}
 	for lca in seedNodes:
-		print lca
-		# for each seed set we pick 10 at random
-		seedNum = min(20, len(seedNodes[lca]))
-		seeds = set(random.sample(seedNodes[lca], seedNum))
+		for seed in seedNodes[lca]:
+			nodeMap[seed] = lca
+	
+	# create node->lca mapping for tight seeds
+	tightMap = {}
+	for lca in tightNodes:
+		for seed in tightNodes[lca]:
+			tightMap[seed] = lca
 		
-		nodes = []
-		for seed in seeds:
-			print seed
-			# reduce the search space by searching only subgraph with a certain depth from seeds
-			nodes += nx.ego_graph(initCore, seed, radius = 4).nodes()
-			print '#nodes:', len(nodes)
-		
-		# extract the subgraph
-		subgraph = initCore.subgraph(set(nodes))
-		print 'subgraph extracted, node number:', len(subgraph.nodes())
-		
-		# run pprc here
-		contigSet = pprc(subgraph, seeds, alpha, tol, maxiter)
-		sets[lca] = contigSet
+	# core->lca mapping
+	subIndex = 0
+	coreMap = {}
+	coreSeeds = {}
+	lcaType = {}
+	sets = {}
+	tempSets = {}
+	for core in cores:
+		nodes = core.nodes()
+		seeds = {}
+		for node in nodes:
+			if node not in nodeMap and node not in tightMap:
+				continue
+			if node in nodeMap:
+				lca = nodeMap[node]
+				lcaType[lca] = 1
+			else:
+				lca = tightMap[node]
+				lcaType[lca] = 0
+				
+			if lca not in seeds:
+				seeds[lca] = []
+			
+			seeds[lca].append(node)
+				
+		if len(seeds) == 0:
+			subIndex += 1
+			coreID = str(coreIndex) + '.' + str(subIndex) + '.unknown'
+			sets[coreID] = core.nodes()
+		else:
+			if len(seeds) == 1:
+				lca = seeds.keys()[0]
+				if lca not in tempSets:
+					tempSets[lca] = []
+				tempSets[lca].append(core.nodes())
+			else:
+				for lca in seeds:
+					contigs = pprc(core, seeds[lca], alpha, tol, maxiter)
+					print lca, contigs
+					tempSets[lca].append(contigs)
+	
+	
 		
 	return sets
 	

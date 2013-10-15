@@ -993,13 +993,11 @@ class ContigSpace(nx.Graph):
 				else:
 					subcores = initCore.copy()
 				
-				"""
 				# use community personalized PageRank to merge or further split cores
 				contigSets = commPageRank(subcores, coreIndex, seedNodes, tightNodes, options)	
 				for coreID in contigSets:
 					self.cores[coreID] = contigSets[coreID]
-				"""				
-		
+				
 			else:
 				if len(seedNodes.keys()) == 1:
 					lca = seedNodes.keys()[0]
