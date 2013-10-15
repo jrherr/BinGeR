@@ -171,7 +171,7 @@ def nodePhylo(index, G, tTree, projInfo, options):
 	# run blat
 	blatfile = tempfasta.replace('fa', 'blat')
 	logfile = tempfasta.replace('fa', 'log')
-	phyloGraphFile = tempfasta.replace('fa', 'graph.cpickle')
+	phyloGraphFile = tempfasta.replace('fa', 'tree')
 	database = projInfo.out_dir + '/genes.prot.clustered/allGenes.fasta'
 	
 	if os.path.exists(blatfile):
