@@ -146,7 +146,6 @@ def commPageRank(cores, coreIndex, seedNodes, tightNodes, options):
 						tempSets[lca] = []
 					tempSets[lca].append(contigs)
 	
-	
 		
 	return sets
 	
@@ -174,7 +173,7 @@ def pprc(G, seeds, alpha, tol, maxiter):
 		pr = nx.pagerank(G, alpha = alpha, max_iter = maxiter, 
 				personalization = personalizationDict, tol = tol)
 	
-	except nx.exception.networkXError:	
+	except nx.exception.NetworkXError:	
 		pr = {}
 		r = {}
 		Q = collections.deque()
