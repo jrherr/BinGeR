@@ -79,7 +79,7 @@ def commCrunch(initCore, coreIndex, projInfo, options):
 	if not options.quiet:
 		sys.stdout.write('[initCore %i] Done.\n' % (coreIndex+1))
 		
-	return subgraph
+	return subgraphs
 	
 # End of commCrunch
 
