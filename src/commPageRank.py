@@ -35,6 +35,7 @@ import networkx as nx
 from operator import itemgetter
 import cPickle
 import community
+from multiprocessing import Pool
 
 def commCrunch(initCore, coreIndex, projInfo, options):
 	# pickfile that holds the partition results
@@ -142,16 +143,24 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 			tempSets[lca].append(core.nodes())
 		
 		else:
-			for lca in seeds:
-				contigs = pprc(core, seeds[lca], alpha, tol, maxiter)
+			pprcCMDs = [[core, seeds[lca], alpha, tol, maxiter, lca] for lca in seeds]
+			pool = Pool(options.num_proc)
+			results = pool.map_async(pprc, pprcCMDs)
+			pool.close()
+			pool.join()
+			
+			for result in results.get():
+				lca = result[0]
+				contigs = result[1]
 				S[lca] = contigs
+				
 			# calculate the overlaps between LCAs
 			print 'start cal LCAs overlaps'
 			
 			lcas = S.keys()
 			lcaGraph = nx.Graph()
 			lcaGraph.add_nodes_from(lcas)
-			lcaLinks = ()
+			lcaLinks = []
 			for i, lca1 in enumerate(lcas):
 				for j, lca2 in enumerate(lcas):
 					if i <= j:
@@ -174,7 +183,7 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 	
 # end of commPageRank
 
-def pprc(G, seeds, alpha, tol, maxiter):
+def pprc(G, seeds, alpha, tol, maxiter, lca):
 	"""
 	This personalized PageRank clustering algorithm was originally designed by
 	David F. Gleich at Purdue University. Here I tweaked it to suit the networkx 
@@ -252,6 +261,6 @@ def pprc(G, seeds, alpha, tol, maxiter):
 			bestcond = cutS/min(volS, Gvol - volS)
 			bestset = set(S)
 	
-	return bestset
+	return lca, bestset
 	
 # End of pprc
