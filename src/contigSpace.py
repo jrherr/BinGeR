@@ -994,7 +994,8 @@ class ContigSpace(nx.Graph):
 					subcores = initCore.copy()
 				
 				# use community personalized PageRank to merge or further split cores
-				contigSets = commPageRank(subcores, coreIndex, seedNodes, tightNodes, options)	
+				contigSets = commPageRank(subcores, coreIndex, pTree, 
+										seedNodes, tightNodes, options)	
 				for coreID in contigSets:
 					self.cores[coreID] = contigSets[coreID]
 				

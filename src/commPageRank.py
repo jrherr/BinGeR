@@ -83,7 +83,7 @@ def commCrunch(initCore, coreIndex, projInfo, options):
 	
 # End of commCrunch
 
-def commPageRank(cores, coreIndex, seedNodes, tightNodes, options):
+def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 	if not options.quiet:
 		sys.stdout.write('Running community personalized PageRank to evaluate the core set.\n')
 		
@@ -110,9 +110,11 @@ def commPageRank(cores, coreIndex, seedNodes, tightNodes, options):
 	lcaType = {}
 	sets = {}
 	tempSets = {}
+	# iterate every core
 	for core in cores:
 		nodes = core.nodes()
 		seeds = {}
+		S = {}
 		for node in nodes:
 			if node not in nodeMap and node not in tightMap:
 				continue
@@ -128,29 +130,33 @@ def commPageRank(cores, coreIndex, seedNodes, tightNodes, options):
 			
 			seeds[lca].append(node)
 		
-		print '##', len(core.nodes()), 
-		for seed in seeds:
-			print seed, seeds[seed]
-		continue
-		
 		if len(seeds) == 0:
 			subIndex += 1
 			coreID = str(coreIndex) + '.' + str(subIndex) + '.unknown'
 			sets[coreID] = core.nodes()
+		
 		elif len(seeds) == 1:
 			lca = seeds.keys()[0]
 			if lca not in tempSets:
 				tempSets[lca] = []
 			tempSets[lca].append(core.nodes())
+		
 		else:
 			for lca in seeds:
 				contigs = pprc(core, seeds[lca], alpha, tol, maxiter)
-				if lca not in tempSets:
-					tempSets[lca] = []
-				tempSets[lca].append(contigs)
-	
-	
-		
+				S[lca] = contigs
+			# calculate the overlaps between LCAs
+			print 'start cal LCAs overlaps'
+			
+			lcas = S.keys()
+			for i, lca1 in enumerate(lcas):
+				for j, lca2 in enumerate(lcas):
+					if i <= j:
+						continue
+					minLength = min(len(S[lca1]), len(S[lca2]))
+					overlapLength = len(S[lca1] & S[lca2])
+					overlapPercentage = float(overlapLength)/minLength
+					print lca1, lca2, overlapPercentage
 	return sets
 	
 # end of commPageRank
