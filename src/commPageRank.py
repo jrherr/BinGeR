@@ -127,24 +127,26 @@ def commPageRank(cores, coreIndex, seedNodes, tightNodes, options):
 				seeds[lca] = []
 			
 			seeds[lca].append(node)
-				
+		
+		print len(core.nodes()), seeds.keys()
+		continue
+		
 		if len(seeds) == 0:
 			subIndex += 1
 			coreID = str(coreIndex) + '.' + str(subIndex) + '.unknown'
 			sets[coreID] = core.nodes()
+		elif len(seeds) == 1:
+			lca = seeds.keys()[0]
+			if lca not in tempSets:
+				tempSets[lca] = []
+			tempSets[lca].append(core.nodes())
 		else:
-			if len(seeds) == 1:
-				lca = seeds.keys()[0]
+			for lca in seeds:
+				contigs = pprc(core, seeds[lca], alpha, tol, maxiter)
 				if lca not in tempSets:
 					tempSets[lca] = []
-				tempSets[lca].append(core.nodes())
-			else:
-				for lca in seeds:
-					contigs = pprc(core, seeds[lca], alpha, tol, maxiter)
-					print lca, contigs
-					if lca not in tempSets:
-						tempSets[lca] = []
-					tempSets[lca].append(contigs)
+				tempSets[lca].append(contigs)
+	
 	
 		
 	return sets
