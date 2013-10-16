@@ -112,7 +112,7 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 	sets = {}
 	tempSets = {}
 	# iterate every core
-	num_of_cores = len(cores)
+	number_of_cores = len(cores)
 	
 	for index, core in enumerate(cores):
 		nodes = core.nodes()
@@ -135,16 +135,14 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 			
 			seeds[lca].append(node)
 		
-		if len(seeds) == 0:
+		if len(seeds) <= 1:
 			subIndex += 1
-			coreID = str(coreIndex) + '.' + str(subIndex) + '.unknown'
+			if len(seeds) == 0:
+				coreID = str(coreIndex) + '.' + str(subIndex) + '.unknown'
+			else:
+				lca = seeds.keys()[0]
+				coreID = str(coreIndex) + '.' + str(subIndex) + '.' + str(lca) + '.regular'
 			sets[coreID] = core.nodes()
-		
-		elif len(seeds) == 1:
-			lca = seeds.keys()[0]
-			if lca not in tempSets:
-				tempSets[lca] = []
-			tempSets[lca].append(core.nodes())
 		
 		else:
 			pprcCMDs = [[core, seeds[lca], alpha, tol, maxiter, lca] for lca in seeds]
@@ -154,6 +152,7 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 			pool.join()
 			
 			for result in results.get():
+				print result
 				lca = result[0]
 				contigs = result[1]
 				S[lca] = contigs
@@ -178,6 +177,9 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 				contigSet = set()
 				for lca in component:
 					contigSet &= S[lca]
+				commLCA = commLCA(S)
+				sets[commLCA] = contigSet
+				
 				print component, len(contigSet)
 		
 		
