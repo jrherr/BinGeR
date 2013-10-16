@@ -1002,12 +1002,12 @@ class ContigSpace(nx.Graph):
 			else:
 				if len(seedNodes.keys()) == 1:
 					lca = seedNodes.keys()[0]
-					coreID = str(coreIndex) + '.1.' + str(lca) + '.regular'
+					coreID = str(coreIndex) + '.1'
 				elif len(tightNodes.keys()) == 1:
 					lca = tightNodes.keys()[0]
-					coreID = str(coreIndex) + '.1.' + str(lca) + '.compact'
+					coreID = str(coreIndex) + '.1'
 				else:
-					coreID = str(coreIndex) + '.1.0.unknown'
+					coreID = str(coreIndex) + '.1'
 				# put the core contigs into self.core
 				self.cores[coreID] = initCore.nodes()
 				

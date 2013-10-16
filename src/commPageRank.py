@@ -146,9 +146,10 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 		else:
 			pprcCMDs = [[core, seeds[lca], alpha, tol, maxiter] for lca in seeds]
 			pool = Pool(options.num_proc)
-			cpprSets = pool.map_async(pprc, pprcCMDs)
+			results = pool.map_async(pprc, pprcCMDs)
 			pool.close()
 			pool.join()
+			cpprSets = results.get()
 			
 			# calculate the overlaps between LCAs
 			H = nx.Graph()
