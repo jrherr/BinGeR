@@ -137,10 +137,10 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 		if len(seeds) <= 1:
 			subIndex += 1
 			if len(seeds) == 0:
-				coreID = str(coreIndex) + '.' + str(subIndex)
+				coreID = str(coreIndex+1) + '.' + str(subIndex)
 			else:
 				lca = seeds.keys()[0]
-				coreID = str(coreIndex) + '.' + str(subIndex)
+				coreID = str(coreIndex+1) + '.' + str(subIndex)
 			sets[coreID] = core.nodes()
 		
 		else:
@@ -170,11 +170,11 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 				contigSet = set()
 				for i in component:
 					contigSet |= cpprSets[i]
+				if len(contigSet) < 100:
+					continue
 				subIndex += 1
-				coreID = str(coreIndex) + '.' + str(subIndex)
+				coreID = str(coreIndex+1) + '.' + str(subIndex)
 				sets[coreID] = contigSet
-				
-				print coreID, len(contigSet)
 		
 		if not options.quiet:
 			sys.stdout.write('[initCore %i] %i out of %i subcores finished.\n' \
