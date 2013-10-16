@@ -164,7 +164,7 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 					overlapPercentage = float(overlapLength)/minLength
 					if overlapPercentage > 0.5:
 						edges.append((i, j))
-			H.add_edges_from(lcaLinks)
+			H.add_edges_from(edges)
 			
 			for component in nx.connected_components(H):
 				contigSet = set()
