@@ -183,13 +183,14 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 	
 # end of commPageRank
 
-def pprc(G, seeds, alpha, tol, maxiter, lca):
+def pprc(args):
 	"""
 	This personalized PageRank clustering algorithm was originally designed by
 	David F. Gleich at Purdue University. Here I tweaked it to suit the networkx 
 	module and the weighted edge scenario with multiple seeds option.
 	"""
 	
+	(G, seeds, alpha, tol, maxiter, lca) = args
 
 	Gvol = 2 * len(G.edges())
 	
