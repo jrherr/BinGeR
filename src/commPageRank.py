@@ -85,6 +85,9 @@ def commCrunch(initCore, coreIndex, projInfo, options):
 # End of commCrunch
 
 def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
+
+	
+
 	if not options.quiet:
 		sys.stdout.write('[initCore %i] Evaluating initCore using community personalized PageRank...\n' % (coreIndex+1))
 		
@@ -177,7 +180,7 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 				sets[coreID] = contigSet
 		
 		if not options.quiet:
-			sys.stdout.write('[initCore %i] %i out of %i subcores finished.\n' \
+			sys.stdout.write('[initCore %i] %i out of %i subcores finished.\r' \
 					% (coreIndex+1, index+1, number_of_cores))
 			sys.stdout.flush()
 	
