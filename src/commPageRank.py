@@ -85,7 +85,7 @@ def commCrunch(initCore, coreIndex, projInfo, options):
 
 def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 	if not options.quiet:
-		sys.stdout.write('Running community personalized PageRank to evaluate the core set.\n')
+		sys.stdout.write('[initCore %i] Evaluating initCore using community personalized PageRank...\n' % (coreIndex+1))
 		
 	alpha = options.cpr_alpha
 	tol = options.cpr_tol
@@ -160,12 +160,16 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 					overlapLength = len(S[lca1] & S[lca2])
 					overlapPercentage = float(overlapLength)/minLength
 					if overlapPercentage > 0.5:
-						lcaLinks.append(lca1, lca2)
+						lcaLinks.append((lca1, lca2))
 			lcaGraph.add_edges_from(lcaLinks)
 			
 			for component in nx.connected_components(lcaGraph):
-				print component
+				contigSet = []
+				for lca in component:
+					contigSet &= S[lca]
+				print component, len(contigSet)
 			print '=============='
+	
 	return sets
 	
 # end of commPageRank
@@ -173,7 +177,7 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 def pprc(G, seeds, alpha, tol, maxiter):
 	"""
 	This personalized PageRank clustering algorithm was originally designed by
-	David F. Gleich at Purdue University. Here I tweak it to suit the networkx 
+	David F. Gleich at Purdue University. Here I tweaked it to suit the networkx 
 	module and the weighted edge scenario with multiple seeds option.
 	"""
 	
