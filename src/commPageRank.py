@@ -119,7 +119,6 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 		if len(nodes) < 100:
 			continue
 		seeds = {}
-		S = {}
 		for node in nodes:
 			if node not in nodeMap and node not in tightMap:
 				continue
@@ -138,50 +137,43 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 		if len(seeds) <= 1:
 			subIndex += 1
 			if len(seeds) == 0:
-				coreID = str(coreIndex) + '.' + str(subIndex) + '.unknown'
+				coreID = str(coreIndex) + '.' + str(subIndex)
 			else:
 				lca = seeds.keys()[0]
-				coreID = str(coreIndex) + '.' + str(subIndex) + '.' + str(lca) + '.regular'
+				coreID = str(coreIndex) + '.' + str(subIndex)
 			sets[coreID] = core.nodes()
 		
 		else:
-			pprcCMDs = [[core, seeds[lca], alpha, tol, maxiter, lca] for lca in seeds]
+			pprcCMDs = [[core, seeds[lca], alpha, tol, maxiter] for lca in seeds]
 			pool = Pool(options.num_proc)
-			results = pool.map_async(pprc, pprcCMDs)
+			cpprSets = pool.map_async(pprc, pprcCMDs)
 			pool.close()
 			pool.join()
 			
-			for result in results.get():
-				print result
-				lca = result[0]
-				contigs = result[1]
-				S[lca] = contigs
-				
 			# calculate the overlaps between LCAs
-			lcas = S.keys()
-			lcaGraph = nx.Graph()
-			lcaGraph.add_nodes_from(lcas)
-			lcaLinks = []
-			for i, lca1 in enumerate(lcas):
-				for j, lca2 in enumerate(lcas):
+			H = nx.Graph()
+			H.add_nodes_from(range(len(cpprSets)))
+			edges = []
+			for i, set1 in enumerate(cpprSets):
+				for j, set2 in enumerate(cpprSet):
 					if i <= j:
 						continue
-					minLength = min(len(S[lca1]), len(S[lca2]))
-					overlapLength = len(S[lca1] & S[lca2])
+					minLength = min(len(set1), len(set2))
+					overlapLength = len(set1 & set2)
 					overlapPercentage = float(overlapLength)/minLength
 					if overlapPercentage > 0.5:
-						lcaLinks.append((lca1, lca2))
-			lcaGraph.add_edges_from(lcaLinks)
+						edges.append((i, j))
+			H.add_edges_from(lcaLinks)
 			
-			for component in nx.connected_components(lcaGraph):
+			for component in nx.connected_components(H):
 				contigSet = set()
-				for lca in component:
-					contigSet &= S[lca]
-				commLCA = commLCA(S)
-				sets[commLCA] = contigSet
+				for i in component:
+					contigSet &= cpprSets[i]
+				subIndex += 1
+				coreID = str(coreIndex) + '.' + str(subIndex)
+				sets[coreID] = contigSet
 				
 				print component, len(contigSet)
-		
 		
 			print '=============='
 	
@@ -204,7 +196,7 @@ def pprc(args):
 	module and the weighted edge scenario with multiple seeds option.
 	"""
 	
-	(G, seeds, alpha, tol, maxiter, lca) = args
+	(G, seeds, alpha, tol, maxiter) = args
 
 	Gvol = 2 * len(G.edges())
 	
@@ -276,6 +268,6 @@ def pprc(args):
 			bestcond = cutS/min(volS, Gvol - volS)
 			bestset = set(S)
 	
-	return lca, bestset
+	return bestset
 	
 # End of pprc
