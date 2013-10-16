@@ -149,6 +149,9 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 			print 'start cal LCAs overlaps'
 			
 			lcas = S.keys()
+			lcaGraph = nx.Graph()
+			lcaGraph.add_nodes_from(lcas)
+			lcaLinks = ()
 			for i, lca1 in enumerate(lcas):
 				for j, lca2 in enumerate(lcas):
 					if i <= j:
@@ -156,7 +159,13 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 					minLength = min(len(S[lca1]), len(S[lca2]))
 					overlapLength = len(S[lca1] & S[lca2])
 					overlapPercentage = float(overlapLength)/minLength
-					print lca1, lca2, overlapPercentage
+					if overlapPercentage > 0.5
+					lcaLinks.append(lca1, lca2)
+			lcaGraph.add_edges_from(lcaLinks)
+			
+			for component in nx.connected_components(lcaGraph):
+				print component
+			print '=============='
 	return sets
 	
 # end of commPageRank
@@ -238,8 +247,6 @@ def pprc(G, seeds, alpha, tol, maxiter):
 		if cutS/min(volS, Gvol - volS) < bestcond:
 			bestcond = cutS/min(volS, Gvol - volS)
 			bestset = set(S)
-			
-	print "set size: ", len(bestset)
 	
 	return bestset
 	
