@@ -128,7 +128,9 @@ def commPageRank(cores, coreIndex, seedNodes, tightNodes, options):
 			
 			seeds[lca].append(node)
 		
-		print len(core.nodes()), seeds.keys()
+		print '##', len(core.nodes()), 
+		for seed in seeds:
+			print seed, seeds[seed]
 		continue
 		
 		if len(seeds) == 0:
