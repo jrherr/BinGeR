@@ -159,8 +159,8 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 					minLength = min(len(S[lca1]), len(S[lca2]))
 					overlapLength = len(S[lca1] & S[lca2])
 					overlapPercentage = float(overlapLength)/minLength
-					if overlapPercentage > 0.5
-					lcaLinks.append(lca1, lca2)
+					if overlapPercentage > 0.5:
+						lcaLinks.append(lca1, lca2)
 			lcaGraph.add_edges_from(lcaLinks)
 			
 			for component in nx.connected_components(lcaGraph):
