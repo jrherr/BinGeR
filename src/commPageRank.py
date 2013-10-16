@@ -169,15 +169,13 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 			for component in nx.connected_components(H):
 				contigSet = set()
 				for i in component:
-					contigSet &= cpprSets[i]
+					contigSet |= cpprSets[i]
 				subIndex += 1
 				coreID = str(coreIndex) + '.' + str(subIndex)
 				sets[coreID] = contigSet
 				
-				print component, len(contigSet)
+				print coreID, len(contigSet)
 		
-			print '=============='
-	
 		if not options.quiet:
 			sys.stdout.write('[initCore %i] %i out of %i subcores finished.\n' \
 					% (coreIndex+1, index+1, number_of_cores))

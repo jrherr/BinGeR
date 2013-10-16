@@ -1011,7 +1011,6 @@ class ContigSpace(nx.Graph):
 				# put the core contigs into self.core
 				self.cores[coreID] = initCore.nodes()
 				
-		exit(0)
 		# clean up self.graphs to release RAM
 		for clusterName in self.graphs:
 			self.graphs[clusterName].clear()
@@ -1029,7 +1028,6 @@ class ContigSpace(nx.Graph):
 			sys.stderr.write('WARNING: Failure in removing intermediate protein sequences directory.\n')	
 	
 	# End of refineCores
-
 
 	############ major function to recruit contigs to cores #############
 	def recruitContigs(self, projInfo, options):
