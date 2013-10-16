@@ -133,7 +133,7 @@ class ProjectInfo:
 	def printSamples(self):
 		sys.stdout.write("Samples used in this BinGeR run:\n")
 		sampleLine = ', '.join(self.samples)
-		sys.stdout.write("\t%s\n"%sampleLine)
+		sys.stdout.write("\n%s\n"%sampleLine)
 	
 	def getBamFile(self, sample):
 		bamFiles = glob.glob(self.bams_dir+'/'+sample+'[.]*[.]bam')

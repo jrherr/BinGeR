@@ -841,7 +841,7 @@ class ContigSpace(nx.Graph):
 			sys.stdout.write('Now refining cores...\n')
 		
 		# if there is already pickled cores, just load from there
-		pickledCoresFile = projInfo.out_dir + 'cores.cpickle'
+		pickledCoresFile = projInfo.out_dir + '/cores.cpickle'
 		if os.path.exists(pickledCoresFile):
 			if not options.quiet:
 				sys.stdout.write('Loading refined cores from pickle...\n')
@@ -1030,7 +1030,7 @@ class ContigSpace(nx.Graph):
 			assemblyFile = projInfo.getAssemblyFile(sample)
 			afh = open(assemblyFile, 'r')
 			for record in SeqIO.parse(afh, "fasta"):
-				contigIDs[record.name]
+				print record.name, record.id
 			afh.close()
 		
 		print 'Code under construction\n'
