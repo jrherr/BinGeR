@@ -156,7 +156,7 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 			H.add_nodes_from(range(len(cpprSets)))
 			edges = []
 			for i, set1 in enumerate(cpprSets):
-				for j, set2 in enumerate(cpprSet):
+				for j, set2 in enumerate(cpprSets):
 					if i <= j:
 						continue
 					minLength = min(len(set1), len(set2))
