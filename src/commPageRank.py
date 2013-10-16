@@ -116,6 +116,8 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 	
 	for index, core in enumerate(cores):
 		nodes = core.nodes()
+		if len(nodes) < 100:
+			continue
 		seeds = {}
 		S = {}
 		for node in nodes:
@@ -184,7 +186,11 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 		if not options.quiet:
 			sys.stdout.write('[initCore %i] %i out of %i subcores finished.\n' \
 					% (coreIndex+1, index+1, number_of_cores))
+			sys.stdout.flush()
 	
+	if not options.quiet:
+		sys.stdout.write('[initCore %i] Done.                               \n'%(coreIndex+1))
+		
 	return sets
 	
 # end of commPageRank

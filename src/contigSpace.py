@@ -1016,7 +1016,7 @@ class ContigSpace(nx.Graph):
 		for clusterName in self.graphs:
 			self.graphs[clusterName].clear()
 			
-		# pickle self.cores
+		# clean and pickle self.cores
 		self.pickleCores(pickledCoresFile, options)
 		
 		if not options.quiet:
