@@ -112,7 +112,9 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 	sets = {}
 	tempSets = {}
 	# iterate every core
-	for core in cores:
+	num_of_cores = len(cores)
+	
+	for index, core in enumerate(cores):
 		nodes = core.nodes()
 		seeds = {}
 		S = {}
@@ -155,8 +157,6 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 				S[lca] = contigs
 				
 			# calculate the overlaps between LCAs
-			print 'start cal LCAs overlaps'
-			
 			lcas = S.keys()
 			lcaGraph = nx.Graph()
 			lcaGraph.add_nodes_from(lcas)
@@ -173,11 +173,17 @@ def commPageRank(cores, coreIndex, pTree, seedNodes, tightNodes, options):
 			lcaGraph.add_edges_from(lcaLinks)
 			
 			for component in nx.connected_components(lcaGraph):
-				contigSet = []
+				contigSet = set()
 				for lca in component:
 					contigSet &= S[lca]
 				print component, len(contigSet)
+		
+		
 			print '=============='
+	
+		if not options.quiet:
+			sys.stdout.write('[initCore %i] %i out of %i subcores finished.\n' \
+					% (coreIndex+1, index+1, number_of_cores))
 	
 	return sets
 	
