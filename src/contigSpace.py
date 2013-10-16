@@ -1000,8 +1000,8 @@ class ContigSpace(nx.Graph):
 					self.cores[coreID] = contigSets[coreID]
 				
 			else:
-				coreID = str(coreIndex) + '.1'
 				# put the core contigs into self.core
+				coreID = str(coreIndex+1) + '.1'
 				self.cores[coreID] = initCore.nodes()
 				
 		# clean up self.graphs to release RAM
