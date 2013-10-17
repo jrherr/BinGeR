@@ -1134,7 +1134,7 @@ class ContigSpace(nx.Graph):
 		
 		inputSet = []
 		for contigID in contigIDs:
-			inputSet.append(contigCoverage[contigID]
+			inputSet.append(contigCoverage[contigID])
 		
 		print 'Running prediction...'
 		outputEncodedLabels = coreLinearSVC.predict(inputSet)
