@@ -1045,6 +1045,9 @@ class ContigSpace(nx.Graph):
 			return		
 		
 		# load all contigIDs into a dict with binary values
+		if not options.quiet:
+			sys.stdout.write('Loading all contigs from assemblies...\n')
+		
 		contigIDs = {}
 		for sample in projInfo.samples:
 			contigIDs[sample] = []
@@ -1069,6 +1072,9 @@ class ContigSpace(nx.Graph):
 			for sample in contigIDs:
 				contigIDs[sample] = contigIDs[sample].difference(contigs)
 		
+		if not options.quiet:
+			sys.stdout.write('Done.\n')
+			
 		# get the coverage information
 		if not options.quiet:
 			sys.stdout.write('Loading contig coverage dynamics...\n')
@@ -1095,19 +1101,44 @@ class ContigSpace(nx.Graph):
 		if not options.quiet:
 			sys.stdout.write('Done.\n')
 		
-		# perform SVM classification
-		# train the SVM first
+		# perform linear SVM classification
+		# train the linear SVM first
 		if not options.quiet:
 			sys.stdout.write('Training SVM for cores...\n')
 		
-		encodedCoreLabels = preprocessing.LabelEncoder()
-		encodedCoreLabels.fit(self.cores.keys())
-		print list(encodedCoreLabels.classes_)
+		# construct training set
+		print 'Constructing training sets...'
 		
+		trainingSet = []
+		labels = []
+		for coreID in self.cores:
+			for contigID in self.cores[coreID]:
+				trainingSet.append(contigCoverage[contigID])
+				labels.append(coreID)
+		
+		# encode the labels
+		coreLabelEncoder = preprocessing.LabelEncoder()
+		coreLabelEncoder.fit(labels)
+		encodedCoreLabels = coreLabelEncoder.transform(labels)
+		
+		coreLinearSVC = svm.LinearSVC()
+		coreLinearSVC.fit(trainingSet, encodedCoreLabels)
+		
+		print 'Done.'
 		
 		# Run SVC
 		if not options.quiet:
 			sys.stdout.write('Now running SVC...\n')
+			
+		print 'Constructing input set...'
+		
+		inputSet = []
+		for contigID in contigIDs:
+			inputSet.append(contigCoverage[contigID]
+		
+		print 'Running prediction...'
+		outputEncodedLabels = coreLinearSVC.predict(inputSet)
+
 			
 		if not options.quiet:
 			sys.stdout.write('Done.\n')
@@ -1116,6 +1147,9 @@ class ContigSpace(nx.Graph):
 		# save results to self.core as dict keyed by core ID and valued by sets of contig ID
 		if not options.quiet:
 			sys.stdout.write('Rendering results...\n')
+		
+		# get the coreIDs for each contig
+		outputCoreLabels = coreLabelEncoder.inverse_transform(outputEncodedLabels)
 			
 		print 'Code under construction\n'
 
