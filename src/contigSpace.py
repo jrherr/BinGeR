@@ -1132,7 +1132,7 @@ class ContigSpace(nx.Graph):
 			sys.stdout.write('Done.\n')
 			
 	except:
-		os.stderr.write('FATAL: failure in pickling final cores.\n')
+		sys.stderr.write('FATAL: failure in pickling final cores.\n')
 		exit(0)
 				
 	# End of recruitContigs
