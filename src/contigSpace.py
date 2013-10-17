@@ -38,10 +38,11 @@ import cPickle
 import networkx as nx
 from Bio import SeqIO
 import numpy as np
+import random
 from scipy.spatial import distance
 from scipy.stats import norm
 from sklearn import svm, preprocessing
-
+from sklearn.neighbors import DistanceMetric, RadiusNeighborsClassifier
 import phylo
 from taxonomy import TaxonTree
 from commPageRank import commPageRank, commCrunch
@@ -1101,12 +1102,7 @@ class ContigSpace(nx.Graph):
 		if not options.quiet:
 			sys.stdout.write('Done.\n')
 		
-		# perform linear SVM classification
-		# train the linear SVM first
-		if not options.quiet:
-			sys.stdout.write('Training SVM for cores...\n')
-		
-		# construct training set
+		# construct training set for K-nearest neighbors
 		print 'Constructing training sets...'
 		
 		trainingSet = []
@@ -1121,28 +1117,25 @@ class ContigSpace(nx.Graph):
 		coreLabelEncoder.fit(labels)
 		encodedCoreLabels = coreLabelEncoder.transform(labels)
 		
-		coreLinearSVC = svm.LinearSVC()
-		coreLinearSVC.fit(trainingSet, encodedCoreLabels)
+		print 'Train classifier'
+		radiusNeighbor = RadiusNeighborsClassifier(radius = 0.2, 
+						metric = corrDist, algorithm = 'ball_tree')
+		radiusNeighbor.fit(trainingSet, encodedCoreLabels)
 		
-		print 'Done.'
-		
-		# Run SVC
-		if not options.quiet:
-			sys.stdout.write('Now running SVC...\n')
-			
+		# construct input set for K-nearest neighbors	
 		print 'Constructing input set...'
 		
 		inputSet = []
+		inputContigIDs = []
 		for contigID in contigIDs:
+			inputContigIDs.append(contigID)
 			inputSet.append(contigCoverage[contigID])
 		
+		
 		print 'Running prediction...'
-		outputEncodedLabels = coreLinearSVC.predict(inputSet)
-
-			
+		outputEncodedLabels = radiusNeighbor.predict(inputSet)
 		if not options.quiet:
 			sys.stdout.write('Done.\n')
-		
 		
 		# save results to self.core as dict keyed by core ID and valued by sets of contig ID
 		if not options.quiet:
@@ -1411,3 +1404,6 @@ def edgesFromZScoreClustering(tri, tetra, columnLabels, threshold):
 	return edges
 
 # End of edgesFromZScoreClustering
+
+def corrDist(x, y):
+	return 1-abs(np.corrcoef(x, y)[0, 0])
