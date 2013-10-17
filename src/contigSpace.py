@@ -1117,23 +1117,23 @@ class ContigSpace(nx.Graph):
 		if not options.quiet:
 			sys.stdout.write('Rendering results...\n')
 			
-	print 'Code under construction\n'
+		print 'Code under construction\n'
 
-	# pickle the results
-	try:
-		if not options.quiet:
-			sys.stdout.write('Pickling final cores...\n')
+		# pickle the results
+		try:
+			if not options.quiet:
+				sys.stdout.write('Pickling final cores...\n')
 		
-		cfh = open(finalCores, 'wb')
-		cPickle.dump(self.cores, cfh)
-		cfh.close()
-		
-		if not options.quiet:
-			sys.stdout.write('Done.\n')
+			cfh = open(finalCores, 'wb')
+			cPickle.dump(self.cores, cfh)
+			cfh.close()
 			
-	except:
-		sys.stderr.write('FATAL: failure in pickling final cores.\n')
-		exit(0)
+			if not options.quiet:
+				sys.stdout.write('Done.\n')
+			
+		except:
+			sys.stderr.write('FATAL: failure in pickling final cores.\n')
+			exit(0)
 				
 	# End of recruitContigs
 
