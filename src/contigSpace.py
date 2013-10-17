@@ -42,7 +42,7 @@ from Bio import SeqIO
 import numpy as np
 from scipy.spatial import distance
 from scipy.stats import norm
-from sklearn import svm, preprocessing
+from sklearn import preprocessing
 from sklearn.neighbors import NearestNeighbors
 
 import phylo
@@ -1113,6 +1113,10 @@ class ContigSpace(nx.Graph):
 			for contigID in self.cores[coreID]:
 				trainingSet.append(contigCoverage[contigID])
 				labels.append(coreID)
+		
+		# encode the labels
+		label_encoder = preprocessing.LabelEncoder()
+		encodedCoreLabels = label_encoder.fit(labels)
 		
 		print 'Train classifier'
 		radiusNeighbor = NearestNeighbors(radius = 0.1, n_neighbors = 20,
