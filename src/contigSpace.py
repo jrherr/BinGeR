@@ -1027,7 +1027,7 @@ class ContigSpace(nx.Graph):
 	
 		# construct the final cores directory
 		finalCores = projInfo.out_dir + '/finalCores.cpickle'
-		if os.path.exists(finalCore):
+		if os.path.exists(finalCores):
 			try:
 				if not options.quiet:
 					sys.stdout.write('Loading final cores from pickle...\n')
