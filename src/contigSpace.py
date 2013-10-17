@@ -35,14 +35,16 @@ import shutil
 from subprocess import Popen, PIPE, call
 import multiprocessing as mp
 import cPickle
+from collections import Counter
+
 import networkx as nx
 from Bio import SeqIO
 import numpy as np
-import random
 from scipy.spatial import distance
 from scipy.stats import norm
 from sklearn import svm, preprocessing
-from sklearn.neighbors import DistanceMetric, RadiusNeighborsClassifier
+from sklearn.neighbors import NearestNeighbors
+
 import phylo
 from taxonomy import TaxonTree
 from commPageRank import commPageRank, commCrunch
@@ -1112,13 +1114,8 @@ class ContigSpace(nx.Graph):
 				trainingSet.append(contigCoverage[contigID])
 				labels.append(coreID)
 		
-		# encode the labels
-		coreLabelEncoder = preprocessing.LabelEncoder()
-		coreLabelEncoder.fit(labels)
-		encodedCoreLabels = coreLabelEncoder.transform(labels)
-		
 		print 'Train classifier'
-		radiusNeighbor = RadiusNeighborsClassifier(radius = 0.2, 
+		radiusNeighbor = NearestNeighbors(radius = 0.1, n_neighbors = 20,
 						metric = corrDist, algorithm = 'ball_tree')
 		radiusNeighbor.fit(trainingSet, encodedCoreLabels)
 		
@@ -1127,26 +1124,35 @@ class ContigSpace(nx.Graph):
 		
 		inputSet = []
 		inputContigIDs = []
-		for contigID in contigIDs:
-			inputContigIDs.append(contigID)
-			inputSet.append(contigCoverage[contigID])
+		for sample in contigIDs:
+			for contigID in contigIDs[sample]:
+				inputContigIDs.append(contigID)
+				inputSet.append(contigCoverage[contigID])
 		
 		
 		print 'Running prediction...'
-		outputEncodedLabels = radiusNeighbor.predict(inputSet)
-		if not options.quiet:
-			sys.stdout.write('Done.\n')
+		distances, contigIndices = radiusNeighbor.kneighbors(inputSet, n_neighbors = 20,
+							radius = 0.1, return_distance = False)
 		
-		# save results to self.core as dict keyed by core ID and valued by sets of contig ID
 		if not options.quiet:
 			sys.stdout.write('Rendering results...\n')
-		
-		# get the coreIDs for each contig
-		outputCoreLabels = coreLabelEncoder.inverse_transform(outputEncodedLabels)
+		for contigIndex, (distance, contigIndexArray) in enumerate(zip(distances, contigIndices)):
+			contigIndexWithinRadius = contigIndexArray[distance < 0.1]
+			if len(contigIndexWithinRadius) < 15:
+				continue
+			contigID = inputContigIDs[contigIndex]
+			coreIDs = [labels[x] for x in contigIndexWithinRadius]
+			coreIDCount = sorted(Counter(coreIDs).iteritems(), key = lambda x: x[1], reverse = True)
+			if coreIDCount[0][1] < 0.9 * len(contigIndexWithinRadius):
+				continue			
+			# save results to self.core as dict keyed by core ID and valued by sets of contig ID
+			coreID = coreIDCount[0][0]
+			self.cores[coreID].append(contigID)
 			
-		print 'Code under construction\n'
+		if not options.quiet:
+			sys.stdout.write('Done.\n')	
 
-		# pickle the results
+		# pickle the results stored in self.cores
 		try:
 			if not options.quiet:
 				sys.stdout.write('Pickling final cores...\n')
