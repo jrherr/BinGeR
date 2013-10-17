@@ -1135,8 +1135,8 @@ class ContigSpace(nx.Graph):
 		
 		
 		print 'Running prediction...'
-		distances, contigIndices = radiusNeighbor.kneighbors(inputSet, n_neighbors = 20,
-							radius = 0.1, return_distance = False)
+		distances, contigIndices = radiusNeighbor.kneighbors(inputSet, 
+								n_neighbors = 20, return_distance = False)
 		
 		if not options.quiet:
 			sys.stdout.write('Rendering results...\n')
