@@ -28,6 +28,8 @@ python BinGeR.py --help
 """
 
 import sys
+import os
+import pysam
 
 def outputBins(projInfo, options):
 	sys.stdout.write('Code under construction\n')

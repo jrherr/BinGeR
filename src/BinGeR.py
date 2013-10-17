@@ -466,15 +466,8 @@ def main(argv = sys.argv[1:]):
 	G = cSpace.ContigSpace(projInfo.samples)
 	
 	initCoresPath = projInfo.out_dir + '/initCores'
-	refinedCoresPath = projInfo.out_dir + '/refinedCores'
-	finalCoresPath = projInfo.out_dir + '/finalCores'
-	if os.path.exists(finalCoresPath):
-		if len(glob.glob(finalCoresPath + '/*.cpickle')) > 0:
-			pass
-	elif os.path.exists(refinedCoresPath):
-		if len(glob.glob(refinedCoresPath + '/*.cpickle')) > 0:
-			G.recruitContigs(projInfo, options)
-	elif os.path.exists(initCoresPath):
+	
+	if os.path.exists(initCoresPath):
 		if len(glob.glob(initCoresPath + '/*.cpickle')) > 0:
 			G.refineCores(projInfo, options)
 			G.recruitContigs(projInfo, options)

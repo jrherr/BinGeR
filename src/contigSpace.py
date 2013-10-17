@@ -37,10 +37,10 @@ import multiprocessing as mp
 import cPickle
 import networkx as nx
 from Bio import SeqIO
-import pysam
 import numpy as np
 from scipy.spatial import distance
 from scipy.stats import norm
+from sklearn import svm, preprocessing
 
 import phylo
 from taxonomy import TaxonTree
@@ -1024,29 +1024,119 @@ class ContigSpace(nx.Graph):
 
 	############ major function to recruit contigs to cores #############
 	def recruitContigs(self, projInfo, options):
+	
+		# construct the final cores directory
+		finalCores = projInfo.out_dir + '/finalCores.cpickle'
+		if os.path.exists(finalCore):
+			try:
+				if not options.quiet:
+					sys.stdout.write('Loading final cores from pickle...\n')
+				cfh = open(finalCores, 'rb')
+				self.cores = {}
+				self.cores = cPickle.load(cfh)
+				cfh.close()
+				if not options.quiet:
+					sys.stdout.write('Done.\n')
+				
+			except:
+				os.stderr.write('FATAL: failure in loading final cores.\n')
+				exit(0)	
+			
+			return		
+		
 		# load all contigIDs into a dict with binary values
 		contigIDs = {}
 		for sample in projInfo.samples:
+			contigIDs[sample] = []
 			assemblyFile = projInfo.getAssemblyFile(sample)
 			afh = open(assemblyFile, 'r')
 			for record in SeqIO.parse(afh, "fasta"):
-				print record.name, record.id
+				contigIDs[sample].append(record.id)
+			contigIDs[sample] = set(contigIDs[sample])
 			afh.close()
 		
-		print 'Code under construction\n'
+		# clean the core first (coreSize >= 100)
+		cores_to_remove = []
+		for coreID in self.cores:
+			if len(self.cores[coreID]) < 100:
+				cores_to_remove.append(coreID)
+		for coreID in cores_to_remove:
+			del self.cores[coreID]
+		
+		# remove the ones that are in the cores
+		for coreID in self.cores:
+			contigs = self.cores[coreID]
+			for sample in contigIDs:
+				contigIDs[sample] = contigIDs[sample].difference(contigs)
+		
+		# get the coverage information
+		if not options.quiet:
+			sys.stdout.write('Loading contig coverage dynamics...\n')
+		contigCoverage = {}
+		for sample in projInfo.samples:
+			for index, readSample in enumerate(projInfo.samples):
+				coverageFile = projInfo.getCoverageFile(readSample, sample)
+				cfh = open(coverageFile, 'r')
+				# discard the header lines (2)
+				for k in range(2): disLine = cfh.readline()
+	
+				while 1:
+					line=cfh.readline().rstrip('\n')
+					if not line:
+						break
+					ele = line.split('\t')
+					contig = ele[0]
+					length = int(ele[1])
+					cov = float(ele[-1])
+					if index == 0:
+						contigCoverage[contig] = []
+					contigCoverage[contig].append(cov)
+				cfh.close()
+		if not options.quiet:
+			sys.stdout.write('Done.\n')
+		
+		# perform SVM classification
+		# train the SVM first
+		if not options.quiet:
+			sys.stdout.write('Training SVM for cores...\n')
+		
+		encodedCoreLabels = preprocessing.LabelEncoder()
+		encodedCoreLabels.fit(self.cores.keys())
+		print list(encodedCoreLabels.classes_)
+		
+		
+		# Run SVC
+		if not options.quiet:
+			sys.stdout.write('Now running SVC...\n')
+			
+		if not options.quiet:
+			sys.stdout.write('Done.\n')
+		
+		
+		# save results to self.core as dict keyed by core ID and valued by sets of contig ID
+		if not options.quiet:
+			sys.stdout.write('Rendering results...\n')
+			
+	print 'Code under construction\n'
 
+	# pickle the results
+	try:
+		if not options.quiet:
+			sys.stdout.write('Pickling final cores...\n')
+		
+		cfh = open(finalCores, 'wb')
+		cPickle.dump(self.cores, cfh)
+		cfh.close()
+		
+		if not options.quiet:
+			sys.stdout.write('Done.\n')
+			
+	except:
+		os.stderr.write('FATAL: failure in pickling final cores.\n')
+		exit(0)
+				
 	# End of recruitContigs
 
-	def outputBins(self, projInfo, options):
-		print 'Code under construction\n'
-
-	# End of outputBins
-
-	def extractReadsForBins(self, projInfo, options):
-		print 'Code under construction\n'
-
-	# End of extractReadsForBins
-	
 # End of class ContigSpace
 
 ######################## FUNCTIONS ####################
