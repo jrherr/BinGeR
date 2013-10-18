@@ -36,6 +36,7 @@ from subprocess import Popen, PIPE, call
 import multiprocessing as mp
 import cPickle
 from collections import Counter
+from operator import itemgetter
 
 import networkx as nx
 from Bio import SeqIO
@@ -1110,7 +1111,7 @@ class ContigSpace(nx.Graph):
 		trainingSet = []
 		labels = []
 		for coreID in self.cores:
-			for contigID in self.cores[coreID]:
+			for contigID in random.sample(self.cores[coreID], 100):   # for each core, sample 100 contigs at ramdon
 				trainingSet.append(contigCoverage[contigID])
 				labels.append(coreID)
 		
@@ -1127,34 +1128,21 @@ class ContigSpace(nx.Graph):
 		print 'Constructing input set...'
 		
 		inputSet = []
-		inputContigIDs = []
+		chunk_size = 1e5
+		
 		for sample in contigIDs:
+			iter +=1
 			for contigID in contigIDs[sample]:
-				inputContigIDs.append(contigID)
-				inputSet.append(contigCoverage[contigID])
+				inputSet.append((contigID, contigCoverage[contigID]))
+		inputSets = list(listChunk(inputSet, chunk_size))
 		
-		
-		print 'Running prediction...'
-		distances, contigIndices = radiusNeighbor.kneighbors(inputSet, 
-								n_neighbors = 20, return_distance = False)
-		
-		if not options.quiet:
-			sys.stdout.write('Rendering results...\n')
-		for contigIndex, (distance, contigIndexArray) in enumerate(zip(distances, contigIndices)):
-			contigIndexWithinRadius = contigIndexArray[distance < 0.1]
-			if len(contigIndexWithinRadius) < 15:
-				continue
-			contigID = inputContigIDs[contigIndex]
-			coreIDs = [labels[x] for x in contigIndexWithinRadius]
-			coreIDCount = sorted(Counter(coreIDs).iteritems(), key = lambda x: x[1], reverse = True)
-			if coreIDCount[0][1] < 0.9 * len(contigIndexWithinRadius):
-				continue			
-			# save results to self.core as dict keyed by core ID and valued by sets of contig ID
-			coreID = coreIDCount[0][0]
-			self.cores[coreID].append(contigID)
-			
-		if not options.quiet:
-			sys.stdout.write('Done.\n')	
+		cmds = [[s, labels, encodedCoreLabels] for s in inputSets]
+		pool = Pool(options.num_proc)
+		results = pool.map_async(radiusKNN, cmds)
+		pool.close()
+		pool.join()
+
+		###########################
 
 		# pickle the results stored in self.cores
 		try:
@@ -1417,3 +1405,46 @@ def edgesFromZScoreClustering(tri, tetra, columnLabels, threshold):
 
 def corrDist(x, y):
 	return 1-abs(np.corrcoef(x, y)[0, 0])
+	
+# End of corrDist
+
+def listChunk(L, chunkSize):
+	for i in xrange(0, len(L), chunkSize):
+		yield L[i:i+chunkSize]
+
+# End of listChunk
+
+def radiusKNN(x):
+	inputSet, lables, encodedCoreLabels = x
+	
+	print 'Running prediction...'
+	
+	cov = map(itemgetter(1), inputSet)
+	inputContigIDs = map(itemgetter(0), inputSet)
+	
+	distances, contigIndices = radiusNeighbor.kneighbors(cov, 
+										n_neighbors = 20, return_distance = False)
+	
+	if not options.quiet:
+		sys.stdout.write('Rendering results...\n')
+	
+	results = []
+	for contigIndex, (distance, contigIndexArray) in enumerate(zip(distances, contigIndices)):
+		contigIndexWithinRadius = contigIndexArray[distance < 0.1]
+		if len(contigIndexWithinRadius) < 15:
+			continue
+		contigID = inputContigIDs[contigIndex]
+		coreIDs = [labels[x] for x in contigIndexWithinRadius]
+		coreIDCount = sorted(Counter(coreIDs).iteritems(), key = lambda x: x[1], reverse = True)
+		if coreIDCount[0][1] < 0.9 * len(contigIndexWithinRadius):
+			continue			
+		# save results to self.core as dict keyed by core ID and valued by sets of contig ID
+		coreID = coreIDCount[0][0]
+		results.append((contigID, coreID))
+		
+	if not options.quiet:
+		sys.stdout.write('Done.\n')
+		
+	return results	
+	
+# End of radiusKNN
