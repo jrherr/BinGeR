@@ -45,7 +45,7 @@ import numpy as np
 from scipy.spatial import distance
 from scipy.stats import norm
 from sklearn import preprocessing
-from sklearn.neighbors import NearestNeighbors
+from sklearn.neighbors import radiusNeighbor
 
 import phylo
 from taxonomy import TaxonTree
@@ -1422,8 +1422,6 @@ def listChunk(L, chunkSize):
 
 def radiusKNN(x):
 	inputSet, lables, encodedCoreLabels = x
-	
-	print 'Running prediction...'
 	
 	cov = map(itemgetter(1), inputSet)
 	inputContigIDs = map(itemgetter(0), inputSet)
