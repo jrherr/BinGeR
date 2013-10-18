@@ -1132,7 +1132,6 @@ class ContigSpace(nx.Graph):
 		chunk_size = 1e5
 		
 		for sample in contigIDs:
-			iter +=1
 			for contigID in contigIDs[sample]:
 				inputSet.append((contigID, contigCoverage[contigID]))
 		inputSets = list(listChunk(inputSet, chunk_size))
