@@ -1146,7 +1146,7 @@ class ContigSpace(nx.Graph):
 		
 		results = []
 		for inputSet in inputSets:
-			results.append(radiusKNN(inputSet, labels, radiusNeighbor))
+			results.append(radiusKNN([inputSet, labels, radiusNeighbor]))
 		# interpret the results
 		for result in results.get():
 			for x in result:
