@@ -45,7 +45,7 @@ import numpy as np
 from scipy.spatial import distance
 from scipy.stats import norm
 from sklearn import preprocessing
-from sklearn.neighbors import radiusNeighbor
+from sklearn.neighbors import NearestNeighbors
 
 import phylo
 from taxonomy import TaxonTree
@@ -1136,7 +1136,7 @@ class ContigSpace(nx.Graph):
 				inputSet.append((contigID, contigCoverage[contigID]))
 		inputSets = list(listChunk(inputSet, chunk_size))
 		
-		cmds = [[s, labels, encodedCoreLabels] for s in inputSets]
+		cmds = [[s, labels, radiusNeighbor] for s in inputSets]
 		pool = mp.Pool(options.num_proc)
 		results = pool.map_async(radiusKNN, cmds)
 		pool.close()
@@ -1421,7 +1421,7 @@ def listChunk(L, chunkSize):
 # End of listChunk
 
 def radiusKNN(x):
-	inputSet, lables, encodedCoreLabels = x
+	inputSet, lables, radiusNeighbor = x
 	
 	cov = map(itemgetter(1), inputSet)
 	inputContigIDs = map(itemgetter(0), inputSet)
