@@ -1143,7 +1143,7 @@ class ContigSpace(nx.Graph):
 		pool.join()
 
 		# interpret the results
-		for result in results:
+		for result in results.get():
 			for x in result:
 				contigID = x[0]
 				coreID = x[1]
