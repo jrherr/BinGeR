@@ -1136,19 +1136,24 @@ class ContigSpace(nx.Graph):
 				inputSet.append((contigID, contigCoverage[contigID]))
 		inputSets = list(listChunk(inputSet, chunk_size))
 		
+		"""
 		cmds = [[s, labels, radiusNeighbor] for s in inputSets]
 		pool = mp.Pool(options.num_proc)
 		results = pool.map_async(radiusKNN, cmds)
 		pool.close()
 		pool.join()
-
+		"""
+		
+		results = []
+		for inputSet in inputSets:
+			results.append(radiusKNN(inputSet, labels, radiusNeighbor))
 		# interpret the results
 		for result in results.get():
 			for x in result:
 				contigID = x[0]
 				coreID = x[1]
 				self.cores[coreID].append(contigID)
-
+		
 
 		# pickle the results stored in self.cores
 		try:
