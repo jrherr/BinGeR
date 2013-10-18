@@ -1410,7 +1410,7 @@ def corrDist(x, y):
 
 def listChunk(L, chunkSize):
 	for i in xrange(0, len(L), int(chunkSize)):
-		yield L[i:i+chunkSize]
+		yield L[i:i+int(chunkSize)]
 
 # End of listChunk
 
