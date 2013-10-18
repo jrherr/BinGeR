@@ -1339,7 +1339,7 @@ def generateBlatEdgePickle(projInfo, options):
 		sys.stdout.write('Done.\n')
 	cpfh.close()
 		
-	# End of generateBlatEdgePickle
+# End of generateBlatEdgePickle
 
 def loadBlatEdgesFromPickle(blatPickle, options):
 	try:
@@ -1446,6 +1446,7 @@ def radiusKNN(x):
 			continue			
 		# save results to self.core as dict keyed by core ID and valued by sets of contig ID
 		coreID = coreIDCount[0][0]
+		sys.stdou.write('%s : %s\n' %(contigID, coreID))
 		results.append((contigID, coreID))
 		
 	if not options.quiet:
