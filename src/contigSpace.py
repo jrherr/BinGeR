@@ -1135,10 +1135,13 @@ class ContigSpace(nx.Graph):
 			for contigID in contigIDs[sample]:
 				inputSet.append((contigID, contigCoverage[contigID]))
 		inputSets = list(listChunk(inputSet, chunk_size))
+		pfiles = []
+		for i in range(len(inputSets)):
+			pfiles = projInfo.out_dir + '/temp.' + str(i+1)
 		
 		pool = mp.Pool(options.num_proc)
-		cmds = [[s, labels, radiusNeighbor] for s in inputSets]
-		results = pool.map_async(radiusKNN, cmds)
+		cmds = [[s, labels, radiusNeighbor, pfile] for s, pfile in zip(inputSets, pfiles)]
+		rval = pool.map_async(radiusKNN, cmds)
 		pool.close()
 		pool.join()
 		
@@ -1149,11 +1152,15 @@ class ContigSpace(nx.Graph):
 		"""
 		
 		# interpret the results
-		for result in results.get():
-			for x in result:
+		for pfile in pfiles:
+			pfh = open(pfile, 'rb')
+			result = cPickle.load(pfh)
+			pfh.close()
+			for x in results:
 				contigID = x[0]
 				coreID = x[1]
 				self.cores[coreID].append(contigID)
+			os.path.remove(pfile)
 		
 		
 		# pickle the results stored in self.cores
@@ -1427,7 +1434,7 @@ def listChunk(L, chunkSize):
 # End of listChunk
 
 def radiusKNN(x):
-	inputSet, lables, radiusNeighbor = x
+	inputSet, lables, radiusNeighbor, pickleFile = x
 	
 	cov = map(itemgetter(1), inputSet)
 	inputContigIDs = map(itemgetter(0), inputSet)
@@ -1455,9 +1462,8 @@ def radiusKNN(x):
 		sys.stdou.write('%s : %s\n' %(contigID, coreID))
 		results.append((contigID, coreID))
 		
-	if not options.quiet:
-		sys.stdout.write('Done.\n')
-		
-	return results	
+	pfh = open(pickleFile, 'wb')
+	cPickle.dump(results, pfh)
+	pfh.close()
 	
 # End of radiusKNN
