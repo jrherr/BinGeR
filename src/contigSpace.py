@@ -1135,7 +1135,16 @@ class ContigSpace(nx.Graph):
 			for contigID in contigIDs[sample]:
 				inputSet.append((contigID, contigCoverage[contigID]))
 		inputSets = list(listChunk(inputSet, chunk_size))
-		print inputSets[0][:10]
+		
+		# for testing purpose
+		for i, inputSet in enumerate(inputSets):
+			tempFile = projInfo.out_dir + '/inputSet.' + str(i+1)
+			pfh = open(tempFile, 'wb')
+			cPickle.dump(inputSet, pfh)
+			pfh.close()
+		
+		return
+		
 		pfiles = []
 		for i in range(len(inputSets)):
 			pfile = projInfo.out_dir + '/temp.' + str(i+1)
