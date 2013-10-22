@@ -1137,7 +1137,8 @@ class ContigSpace(nx.Graph):
 		inputSets = list(listChunk(inputSet, chunk_size))
 		pfiles = []
 		for i in range(len(inputSets)):
-			pfiles = projInfo.out_dir + '/temp.' + str(i+1)
+			pfile = projInfo.out_dir + '/temp.' + str(i+1)
+			pfiles.append(pfile)
 		
 		pool = mp.Pool(options.num_proc)
 		cmds = [[s, labels, radiusNeighbor, pfile] for s, pfile in zip(inputSets, pfiles)]
