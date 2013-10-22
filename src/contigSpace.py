@@ -1136,13 +1136,11 @@ class ContigSpace(nx.Graph):
 				inputSet.append((contigID, contigCoverage[contigID]))
 		inputSets = list(listChunk(inputSet, chunk_size))
 		
-		
-		result_queue = mp.Queue()
+		pool = mp.Pool(options.num_proc)
 		cmds = [[s, labels, radiusNeighbor] for s in inputSets]
-		jobs = [mp.Process(cmd) for cmd in cmds]
-		for job in jobs: job.start()
-		for job in jobs: job.join()
-		results = [result_queue.get() for cmd in cmds]
+		results = pool.map_async(radiusKNN, cmds)
+		pool.close()
+		pool.join()
 		
 		"""
 		results = []
@@ -1433,6 +1431,8 @@ def radiusKNN(x):
 	
 	cov = map(itemgetter(1), inputSet)
 	inputContigIDs = map(itemgetter(0), inputSet)
+	
+	sys.stdout.write('Carrying out kneighbors.\n')
 	
 	distances, contigIndices = radiusNeighbor.kneighbors(cov, 
 										n_neighbors = 20, return_distance = False)
