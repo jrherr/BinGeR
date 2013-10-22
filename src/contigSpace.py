@@ -1137,11 +1137,12 @@ class ContigSpace(nx.Graph):
 		inputSets = list(listChunk(inputSet, chunk_size))
 		
 		
+		result_queue = mp.Queue()
 		cmds = [[s, labels, radiusNeighbor] for s in inputSets]
-		pool = mp.Pool(options.num_proc)
-		results = pool.map_async(radiusKNN, cmds)
-		pool.close()
-		pool.join()
+		jobs = [mp.Process(cmd) for cmd in cmds]
+		for job in jobs: job.start()
+		for job in jobs: job.join()
+		results = [result_queue.get() for cmd in cmds]
 		
 		"""
 		results = []
