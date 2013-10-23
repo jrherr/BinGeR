@@ -1150,18 +1150,17 @@ class ContigSpace(nx.Graph):
 			pfile = projInfo.out_dir + '/temp.' + str(i+1)
 			pfiles.append(pfile)
 		
-		"""
+		
 		pool = mp.Pool(options.num_proc)
 		cmds = [[s, labels, radiusNeighbor, pfile] for s, pfile in zip(inputSets, pfiles)]
 		rval = pool.map_async(radiusKNN, cmds)
 		pool.close()
 		pool.join()
 		
-		
+		"""
 		results = []
 		for inputSet in inputSets:
 			results.append(radiusKNN([inputSet, labels, radiusNeighbor]))
-		"""
 		
 		# step-by-step radiusKNN
 		cmds = [[s, labels, radiusNeighbor, pfile] for s, pfile in zip(inputSets, pfiles)]
@@ -1170,6 +1169,7 @@ class ContigSpace(nx.Graph):
 		for i, cmd in enumerate(cmds):
 			print 'radiusKNN #'+str(i+1)
 			radiusKNN(cmd)
+		"""
 		
 		# interpret the results
 		for pfile in pfiles:
