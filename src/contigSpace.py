@@ -1165,6 +1165,7 @@ class ContigSpace(nx.Graph):
 		
 		# step-by-step radiusKNN
 		cmds = [[s, labels, radiusNeighbor, pfile] for s, pfile in zip(inputSets, pfiles)]
+		print cmds
 		for i, cmd in enumerate(cmds):
 			print 'radiusKNN #'+str(i+1)
 			radiusKNN(cmd)
