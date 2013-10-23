@@ -1107,7 +1107,8 @@ class ContigSpace(nx.Graph):
 			sys.stdout.write('Done.\n')
 		
 		# construct training set for K-nearest neighbors
-		print 'Constructing training sets...'
+		if not options.quiet:
+			sys.stdout.write('Constructing training sets...\n')
 		
 		trainingSet = []
 		labels = []
@@ -1120,13 +1121,17 @@ class ContigSpace(nx.Graph):
 		label_encoder = preprocessing.LabelEncoder()
 		encodedCoreLabels = label_encoder.fit(labels)
 		
-		print 'Train classifier'
+		
+		if not options.quiet:
+			sys.stdout.write('Training classifier...\n')
+			
 		radiusNeighbor = NearestNeighbors(radius = 0.1, n_neighbors = 20,
 						metric = corrDist, algorithm = 'ball_tree')
 		radiusNeighbor.fit(trainingSet, encodedCoreLabels)
 		
 		# construct input set for K-nearest neighbors	
-		print 'Constructing input set...'
+		if not options.quiet:
+			sys.stdout.write('Constructing input sets...\n')
 		
 		inputSet = []
 		chunk_size = 1e5
@@ -1143,20 +1148,23 @@ class ContigSpace(nx.Graph):
 			cPickle.dump(inputSet, pfh)
 			pfh.close()
 		
-		
-		
 		pfiles = []
 		for i in range(len(inputSets)):
 			pfile = projInfo.out_dir + '/temp.' + str(i+1)
 			pfiles.append(pfile)
 		
 		
+		if not options.quiet:
+			sys.stdout.write('Classifying...\n')
 		pool = mp.Pool(options.num_proc)
 		cmds = [[s, labels, radiusNeighbor, pfile] for s, pfile in zip(inputSets, pfiles)]
 		rval = pool.map_async(radiusKNN, cmds)
 		pool.close()
 		pool.join()
 		
+		if not options.quiet:
+			sys.stdout.write('Done.\n')
+			
 		"""
 		results = []
 		for inputSet in inputSets:
@@ -1461,9 +1469,13 @@ def radiusKNN(x):
 	
 	sys.stdout.write('Carrying out kneighbors.\n')
 	
-	distances, contigIndices = radiusNeighbor.kneighbors(cov, 
+	try:
+		distances, contigIndices = radiusNeighbor.kneighbors(cov, 
 										n_neighbors = 5, return_distance = True)
-	
+	except:
+		sys.stderr.write('FATAL: failed running kneighbors.\n')
+		exit(0)
+		
 	if not options.quiet:
 		sys.stdout.write('Rendering results...\n')
 	
