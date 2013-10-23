@@ -1462,7 +1462,7 @@ def radiusKNN(x):
 	sys.stdout.write('Carrying out kneighbors.\n')
 	
 	distances, contigIndices = radiusNeighbor.kneighbors(cov, 
-										n_neighbors = 20, return_distance = False)
+										n_neighbors = 5, return_distance = True)
 	
 	if not options.quiet:
 		sys.stdout.write('Rendering results...\n')
@@ -1470,7 +1470,7 @@ def radiusKNN(x):
 	results = []
 	for contigIndex, (distance, contigIndexArray) in enumerate(zip(distances, contigIndices)):
 		contigIndexWithinRadius = contigIndexArray[distance < 0.1]
-		if len(contigIndexWithinRadius) < 15:
+		if len(contigIndexWithinRadius) < 4:
 			continue
 		contigID = inputContigIDs[contigIndex]
 		coreIDs = [labels[x] for x in contigIndexWithinRadius]
