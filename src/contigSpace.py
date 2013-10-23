@@ -44,8 +44,8 @@ from Bio import SeqIO
 import numpy as np
 from scipy.spatial import distance
 from scipy.stats import norm
-from sklearn import preprocessing
-from sklearn.neighbors import NearestNeighbors
+#from sklearn import preprocessing
+#from sklearn.neighbors import NearestNeighbors
 
 import phylo
 from taxonomy import TaxonTree
@@ -1111,23 +1111,9 @@ class ContigSpace(nx.Graph):
 			sys.stdout.write('Constructing training sets...\n')
 		
 		trainingSet = []
-		labels = []
 		for coreID in self.cores:
 			for contigID in random.sample(self.cores[coreID], 100):   # for each core, sample 100 contigs at ramdon
-				trainingSet.append(contigCoverage[contigID])
-				labels.append(coreID)
-		
-		# encode the labels
-		label_encoder = preprocessing.LabelEncoder()
-		encodedCoreLabels = label_encoder.fit(labels)
-		
-		
-		if not options.quiet:
-			sys.stdout.write('Training classifier...\n')
-			
-		radiusNeighbor = NearestNeighbors(radius = 0.1, n_neighbors = 20,
-						metric = corrDist, algorithm = 'ball_tree')
-		radiusNeighbor.fit(trainingSet, encodedCoreLabels)
+				trainingSet.append((coreID, contigCoverage[contigID]))
 		
 		# construct input set for K-nearest neighbors	
 		if not options.quiet:
@@ -1157,7 +1143,7 @@ class ContigSpace(nx.Graph):
 		if not options.quiet:
 			sys.stdout.write('Classifying...\n')
 		pool = mp.Pool(options.num_proc)
-		cmds = [[s, labels, radiusNeighbor, pfile] for s, pfile in zip(inputSets, pfiles)]
+		cmds = [[trainingSet, s, pfile] for s, pfile in zip(inputSets, pfiles)]
 		rval = pool.map_async(radiusKNN, cmds)
 		pool.close()
 		pool.join()
@@ -1461,39 +1447,51 @@ def listChunk(L, chunkSize):
 
 # End of listChunk
 
-def radiusKNN(x):
-	inputSet, lables, radiusNeighbor, pickleFile = x
+def KNNCoreID(dist, labels):
+	x = zip(dist, labels)
+	sortedDist = sorted(x, key = lambda x: x[1])[:20]
+	sortedDistBool = [dist < 0.1 for dist in sortedDist]
+	if sortedDistBool.count(True) < 0.75 * len(sortedDist):
+		return None
+	try:
+		overRangeIndex = sortedDistBool.index(False)
+		t = overRangeIndex
+		coreIDCount = sorted(Counter(map(itemgetter(1), sortedDist[:overRangeIndex])).iteritems(), reverse = True)
+	except ValueError:
+		t = len(sortedDist)
+		coreIDCount = sorted(Counter(map(itemgetter(1), sortedDist)).iteritems(), reverse = True)
+		
+	if coreIDCount[0][1] < 0.9 * t:
+		return None
+	coreID = coreIDCount[0][0]
 	
-	cov = map(itemgetter(1), inputSet)
+	return coreID
+	
+# End of KNNCoreID
+	
+def radiusKNN(x):
+	trainingSet, inputSet, pickleFile = x
+	
+	covs = map(itemgetter(1), inputSet)
 	inputContigIDs = map(itemgetter(0), inputSet)
 	
-	sys.stdout.write('Carrying out kneighbors.\n')
+	trainingCovs = map(itemgetter(1), trainingSet)
+	trainingLabels = map(itemgetter(0), trainingSet)
 	
-	try:
-		distances, contigIndices = radiusNeighbor.kneighbors(cov, 
-										n_neighbors = 5, return_distance = True)
-	except:
-		sys.stderr.write('FATAL: failed running kneighbors.\n')
-		exit(0)
-		
-	if not options.quiet:
-		sys.stdout.write('Rendering results...\n')
+	sys.stdout.write('Calculating all distances...\n')
 	
 	results = []
-	for contigIndex, (distance, contigIndexArray) in enumerate(zip(distances, contigIndices)):
-		contigIndexWithinRadius = contigIndexArray[distance < 0.1]
-		if len(contigIndexWithinRadius) < 4:
+	for contigID, cov in zip(inputContigIDs, covs):
+		tempDist = []
+		for trainingCov in trainingCovs:
+			dist = currDist(cov, trainingCov)
+			tempDist.append(dist)
+		coreID = KNNCoreID(tempDist, trainingLabels)	
+		if coreID == None:
 			continue
-		contigID = inputContigIDs[contigIndex]
-		coreIDs = [labels[x] for x in contigIndexWithinRadius]
-		coreIDCount = sorted(Counter(coreIDs).iteritems(), key = lambda x: x[1], reverse = True)
-		if coreIDCount[0][1] < 0.9 * len(contigIndexWithinRadius):
-			continue			
-		# save results to self.core as dict keyed by core ID and valued by sets of contig ID
-		coreID = coreIDCount[0][0]
-		sys.stdou.write('%s : %s\n' %(contigID, coreID))
-		results.append((contigID, coreID))
-		
+		else:
+			results.append((contigID, coreID))
+			
 	pfh = open(pickleFile, 'wb')
 	cPickle.dump(results, pfh)
 	pfh.close()
