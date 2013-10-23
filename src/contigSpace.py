@@ -1158,7 +1158,7 @@ class ContigSpace(nx.Graph):
 			results.append(radiusKNN([inputSet, labels, radiusNeighbor]))
 		"""
 		# step-by-step radiusKNN
-		cmds = [[s, labels, radiusNeighbor, pfile] for s, pfile in zip(inputSets, pfiles)]
+		cmds = [[trainingSet, s, pfile] for s, pfile in zip(inputSets, pfiles)]
 				
 		for i, cmd in enumerate(cmds):
 			print 'radiusKNN #'+str(i+1)
