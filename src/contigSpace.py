@@ -1484,7 +1484,7 @@ def radiusKNN(x):
 	for contigID, cov in zip(inputContigIDs, covs):
 		tempDist = []
 		for trainingCov in trainingCovs:
-			dist = currDist(cov, trainingCov)
+			dist = corrDist(cov, trainingCov)
 			tempDist.append(dist)
 		coreID = KNNCoreID(tempDist, trainingLabels)	
 		if coreID == None:
