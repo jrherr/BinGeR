@@ -1142,6 +1142,7 @@ class ContigSpace(nx.Graph):
 		
 		if not options.quiet:
 			sys.stdout.write('Classifying...\n')
+		"""
 		pool = mp.Pool(options.num_proc)
 		cmds = [[trainingSet, s, pfile] for s, pfile in zip(inputSets, pfiles)]
 		rval = pool.map_async(radiusKNN, cmds)
@@ -1151,19 +1152,18 @@ class ContigSpace(nx.Graph):
 		if not options.quiet:
 			sys.stdout.write('Done.\n')
 			
-		"""
+		
 		results = []
 		for inputSet in inputSets:
 			results.append(radiusKNN([inputSet, labels, radiusNeighbor]))
-		
+		"""
 		# step-by-step radiusKNN
 		cmds = [[s, labels, radiusNeighbor, pfile] for s, pfile in zip(inputSets, pfiles)]
-		print cmds
-		
+				
 		for i, cmd in enumerate(cmds):
 			print 'radiusKNN #'+str(i+1)
 			radiusKNN(cmd)
-		"""
+		
 		
 		# interpret the results
 		for pfile in pfiles:
