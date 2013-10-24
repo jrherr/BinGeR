@@ -502,7 +502,7 @@ def main(argv = sys.argv[1:]):
 			sys.stdout.write('Done.\n')
 	else:
 		sys.stdout.write('Now extract reads for bins...\n')
-		utilities.extractReadsForBins(projInfo, options)
+#		utilities.extractReadsForBins(projInfo, options)
 		sys.stdout.write('Done.\n')
 	total_finish_time = time()
 	sys.stdout.write("BinGeR finished at %s\n"%(ctime()))

@@ -169,7 +169,7 @@ def extractReadsForBins(projInfo, options):
 
 # End of extractReadsForBins
 
-def categorizeReads(readIDs):
+#def categorizeReads(readIDs):
 	
 	
 # End of categorizeReads
