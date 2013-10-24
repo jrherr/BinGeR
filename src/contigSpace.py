@@ -1160,7 +1160,7 @@ class ContigSpace(nx.Graph):
 		labelEncoder.fit(trainingLabels)
 		
 		KNNModel = NearestNeighbors(n_neighbors = 20)
-		KNNModel.fit(trainingCovs, LabelEncoder.transform(trainingLabels))
+		KNNModel.fit(trainingCovs, labelEncoder.transform(trainingLabels))
 		
 		if not options.quiet:
 			sys.stdout.write('Classifying...\n')
