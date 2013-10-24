@@ -1178,7 +1178,7 @@ class ContigSpace(nx.Graph):
 			pfh = open(pfile, 'rb')
 			result = cPickle.load(pfh)
 			pfh.close()
-			for x in results:
+			for x in result:
 				contigID = x[0]
 				coreID = x[1]
 				self.cores[coreID].append(contigID)
@@ -1482,7 +1482,7 @@ def KNNCoreID(inputSet, trainingSet, neighborsIndex):
 			t = len(sortedDist)
 			coreIDCount = Counter(map(itemgetter(1), sortedDist)).most_common()
 		
-		if coreIDCount[0][1] < 0.9 * t:
+		if coreIDCount[0][1] < 5:
 			coreIDs.append((inputLabel, None))
 			continue
 			
@@ -1495,6 +1495,8 @@ def KNNCoreID(inputSet, trainingSet, neighborsIndex):
 	
 def radiusKNN(x):
 	trainingSet, inputSet, KNNModel, pickleFile = x
+	
+	#sys.stdout.write('## %s' % pickleFile)
 	
 	covs = np.array(map(itemgetter(1), inputSet))
 	for i in range(len(covs)):

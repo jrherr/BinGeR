@@ -29,9 +29,55 @@ python BinGeR.py --help
 
 import sys
 import os
+import cPickle
 import pysam
 
 def outputBins(projInfo, options):
+	"""
+	binContigPath = projInfo.out_dir + '/binContigs'
+	
+	finalCoresPickle = projInfo.out_dir + '/finalCores.cpickle'
+	if not os.path.exists(finalCoresPickle):
+		sys.stderr.write('FATAL: failure in locating the final cores serialized results.\n')
+		exit(0)
+	
+	try:
+		pfh = open(finalCoresPickle, 'rb')
+		cores = cPickle.load(pfh)
+		pfh.close()
+	except:
+		sys.stderr.write('FATAL: failure in unpickling the final cores.\n')
+		exit(0)
+	
+	for sample in projInfo.samples:
+		binPath = binContigPath + '/' + sample
+		if not os.path.exists(binPath):
+			os.mdkir(binPath)
+			
+	contigIDs = {}
+	for coreID in cores:
+		for contigID in cores[coreID]:
+			contigIDs[contigID] = coreID
+			
+	# create file handles
+	ofhs = {}
+	for sample in projInfo.samples:
+		if sample not in ofhs:
+			ofhs[sample] = {}
+		for coreID in cores:
+			binContigFile = binContigPath + '/' + sample + '/' + 
+			if coreID not in ofhs[sample]:
+				
+	
+	for sample in projInfo.samples:
+			contigIDs[sample] = []
+			assemblyFile = projInfo.getAssemblyFile(sample)
+			afh = open(assemblyFile, 'r')
+			for record in SeqIO.parse(afh, "fasta"):
+				contigIDs[sample].append(record.id)
+			contigIDs[sample] = set(contigIDs[sample])
+			afh.close()
+	"""
 	sys.stdout.write('Code under construction\n')
 
 def extractReadsForBins(projInfo, options):
