@@ -1114,6 +1114,7 @@ class ContigSpace(nx.Graph):
 		for coreID in self.cores:
 			for contigID in random.sample(self.cores[coreID], 100):   # for each core, sample 100 contigs at ramdon
 				trainingSet.append((coreID, contigCoverage[contigID]))
+		print len(trainingSet)
 		
 		# construct input set for K-nearest neighbors	
 		if not options.quiet:
