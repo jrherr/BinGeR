@@ -1137,13 +1137,7 @@ class ContigSpace(nx.Graph):
 				inputSet.append((contigID, contigCoverage[contigID]))
 		inputSets = list(listChunk(inputSet, chunk_size))
 		
-		# for testing purpose
-		for i, inputSet in enumerate(inputSets):
-			tempFile = projInfo.out_dir + '/inputSet.' + str(i+1)
-			pfh = open(tempFile, 'wb')
-			cPickle.dump(inputSet, pfh)
-			pfh.close()
-		
+		# pickled files which holds the results
 		pfiles = []
 		for i in range(len(inputSets)):
 			pfile = projInfo.out_dir + '/temp.' + str(i+1)
@@ -1483,6 +1477,8 @@ def KNNCoreID(inputSet, trainingSet, neighborsIndex):
 		except ValueError:
 			t = len(sortedDist)
 			coreIDCount = Counter(map(itemgetter(1), sortedDist)).most_common()
+			print coreIDCount
+			print sortedDist
 		
 		if coreIDCount[0][1] < 0.9 * t:
 			coreIDs.append((inputLabel, None))
