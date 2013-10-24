@@ -1124,8 +1124,7 @@ class ContigSpace(nx.Graph):
 		for coreID in self.cores:
 			for contigID in random.sample(self.cores[coreID], 100):   # for each core, sample 100 contigs at ramdon
 				trainingSet.append((coreID, contigCoverage[contigID]))
-		print len(trainingSet)
-		
+				
 		# construct input set for K-nearest neighbors	
 		if not options.quiet:
 			sys.stdout.write('Constructing input sets...\n')
@@ -1157,7 +1156,7 @@ class ContigSpace(nx.Graph):
 			trainingCovs[i] = trainingCovs[i]/trainingCovs[i].sum()
 		trainingLabels = map(itemgetter(0), trainingSet)
 		
-		labelEncoder = preprocess.LabelEncoder()
+		labelEncoder = preprocessing.LabelEncoder()
 		labelEncoder = fit(trainingLabels)
 		
 		KNNModel = NearestNeighbors(n_neighbors = 20)
@@ -1166,28 +1165,20 @@ class ContigSpace(nx.Graph):
 		if not options.quiet:
 			sys.stdout.write('Classifying...\n')
 		
-		"""
-		pool = mp.Pool(options.num_proc)
 		cmds = [[trainingSet, s, KNNModel, pfile] for s, pfile in zip(inputSets, pfiles)]
-		rval = pool.map_async(radiusKNN, cmds)
-		pool.close()
-		pool.join()
+		
+		if options.num_proc > 1:
+			pool = mp.Pool(options.num_proc)
+			rval = pool.map_async(radiusKNN, cmds)
+			pool.close()
+			pool.join()
+		else:
+			for i, cmd in enumerate(cmds):
+				print 'radiusKNN #'+str(i+1)
+				radiusKNN(cmd)
 		
 		if not options.quiet:
 			sys.stdout.write('Done.\n')
-			
-		
-		results = []
-		for inputSet in inputSets:
-			results.append(radiusKNN([inputSet, labels, radiusNeighbor]))
-		"""
-		# step-by-step radiusKNN
-		cmds = [[trainingSet, s, KNNModel, pfile] for s, pfile in zip(inputSets, pfiles)]
-				
-		for i, cmd in enumerate(cmds):
-			print 'radiusKNN #'+str(i+1)
-			radiusKNN(cmd)
-		
 		
 		# interpret the results
 		for pfile in pfiles:
