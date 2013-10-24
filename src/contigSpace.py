@@ -44,8 +44,8 @@ from Bio import SeqIO
 import numpy as np
 from scipy.spatial import distance
 from scipy.stats import norm
-#from sklearn import preprocessing
-#from sklearn.neighbors import NearestNeighbors
+from sklearn import preprocessing
+from sklearn.neighbors import NearestNeighbors
 
 import phylo
 from taxonomy import TaxonTree
@@ -1140,12 +1140,24 @@ class ContigSpace(nx.Graph):
 			pfile = projInfo.out_dir + '/temp.' + str(i+1)
 			pfiles.append(pfile)
 		
+		if not options.quiet:
+			sys.stdout.write('Training KNN model...\n')
+		trainingCovs = np.array(map(itemgetter(1), trainingSet))
+		for i in len(range(trainingCovs)):
+			trainingCovs[i] = trainingCovs[i]/trainingCovs[i].sum()
+		trainingLabels = map(itemgetter(0), trainingSet)
+		labelEncoder = preprocess.LabelEncoder()
+		labelEncoder = fit(trainingLabels)
+		
+		KNNModel = NearestNeighbors(n_neighbors = 20)
+		KNNModel.fit(trainingCovs, LabelEncoder.transform(trainingLabels))
 		
 		if not options.quiet:
 			sys.stdout.write('Classifying...\n')
+		
 		"""
 		pool = mp.Pool(options.num_proc)
-		cmds = [[trainingSet, s, pfile] for s, pfile in zip(inputSets, pfiles)]
+		cmds = [[trainingSet, s, KNNModel, pfile] for s, pfile in zip(inputSets, pfiles)]
 		rval = pool.map_async(radiusKNN, cmds)
 		pool.close()
 		pool.join()
@@ -1159,7 +1171,7 @@ class ContigSpace(nx.Graph):
 			results.append(radiusKNN([inputSet, labels, radiusNeighbor]))
 		"""
 		# step-by-step radiusKNN
-		cmds = [[trainingSet, s, pfile] for s, pfile in zip(inputSets, pfiles)]
+		cmds = [[trainingSet, s, KNNModel, pfile] for s, pfile in zip(inputSets, pfiles)]
 				
 		for i, cmd in enumerate(cmds):
 			print 'radiusKNN #'+str(i+1)
@@ -1437,10 +1449,10 @@ def edgesFromZScoreClustering(tri, tetra, columnLabels, threshold):
 
 # End of edgesFromZScoreClustering
 
-def corrDist(x, y):
-	return 1-abs(np.corrcoef(x, y)[0, 0])
+def normDist(x, y):
+	return distance.euclidean(x, y)/np.sqrt(np.dot(x, y))
 	
-# End of corrDist
+# End of normDist
 
 def listChunk(L, chunkSize):
 	for i in xrange(0, len(L), int(chunkSize)):
@@ -1448,53 +1460,47 @@ def listChunk(L, chunkSize):
 
 # End of listChunk
 
-def KNNCoreID(dist, labels):
-	x = zip(dist, labels)
-	sortedDist = sorted(x, key = lambda x: x[1])[:20]
-	sortedDistBool = [dist < 0.1 for dist in sortedDist]
-	if sortedDistBool.count(True) < 0.75 * len(sortedDist):
-		return None
-	try:
-		overRangeIndex = sortedDistBool.index(False)
-		t = overRangeIndex
-		coreIDCount = sorted(Counter(map(itemgetter(1), sortedDist[:overRangeIndex])).iteritems(), reverse = True)
-	except ValueError:
-		t = len(sortedDist)
-		coreIDCount = sorted(Counter(map(itemgetter(1), sortedDist)).iteritems(), reverse = True)
+def KNNCoreID(inputSet, trainingSet, neighborsIndex):
+	coreIDs = []
+	for input, index in zip(inputSet, neighborsIndex):
+		selectedNeighbors = [trainingSet[x] for x in index]
+		selectedNeighborsCovs = map(itemgetter(1), selectedNeighbors)
+		selectedNeighborsLabels = map(itemgetter(0), selectedNeighbors)
+		inputLabel, inputCov = input
+		normMinkowski = [normDist(inputCov, x) for x in selectedNeighborsCovs]
+		sortedDist = sorted(zip(selectedNeighborsLabels, normMinkowski), key = lambda x: x[1], reverse = True)
+		sortedDistBool = [dist < 0.05 for dist in map(itemgetter(1), sortedDist)]
+		if sortedDistBool.count(True) < 0.75 * len(sortedDist):
+			coreIDs.append((inputLabel, None))
 		
-	if coreIDCount[0][1] < 0.9 * t:
-		return None
-	coreID = coreIDCount[0][0]
-	
-	return coreID
-	
+		try:
+			overRangeIndex = sortedDistBool.index(False)
+			t = overRangeIndex
+			coreIDCount = sorted(Counter(map(itemgetter(1), sortedDist[:t])).iteritems, reverse = True)
+		except ValueError:
+			t = len(sortedDist)
+			coreIDCount = sorted(Counter(map(itemgetter(1), sortedDist)).iteritems(), reverse = True)
+		
+		if coreIDCount[0][1] < 0.9 * t:
+			coreIDs.append((inputLabel, None))
+		coreID = coreIDCount[0][0]
+		coreIDs.append((inputLabel, None))
+	return coreIDs
+					
 # End of KNNCoreID
 	
 def radiusKNN(x):
-	trainingSet, inputSet, pickleFile = x
+	trainingSet, inputSet, KNNModel, pickleFile = x
 	
-	covs = map(itemgetter(1), inputSet)
-	inputContigIDs = map(itemgetter(0), inputSet)
+	covs = np.array(map(itemgetter(1), inputSet))
+	for i in range(len(covs)):
+		covs[i] = covs[i]/covs[i].sum()
 	
-	trainingCovs = map(itemgetter(1), trainingSet)
-	trainingLabels = map(itemgetter(0), trainingSet)
+	neighborsIndex = KNNModel.kneighbors(covs, n_neighbors = 20, return_distance = False)
+	coreIDs = KNNCoreID(inputSet, trainingSet, neighborsIndex)
 	
-	sys.stdout.write('Calculating all distances...\n')
-	
-	results = []
-	for contigID, cov in zip(inputContigIDs, covs):
-		tempDist = []
-		for trainingCov in trainingCovs:
-			dist = corrDist(cov, trainingCov)
-			tempDist.append(dist)
-		coreID = KNNCoreID(tempDist, trainingLabels)	
-		if coreID == None:
-			continue
-		else:
-			results.append((contigID, coreID))
-			
 	pfh = open(pickleFile, 'wb')
-	cPickle.dump(results, pfh)
+	cPickle.dump(coreIDs, pfh)
 	pfh.close()
 	
 # End of radiusKNN
