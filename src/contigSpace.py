@@ -1479,7 +1479,7 @@ def KNNCoreID(inputSet, trainingSet, neighborsIndex):
 		try:
 			overRangeIndex = sortedDistBool.index(False)
 			t = overRangeIndex
-			coreIDCount = Counter(map(itemgetter(1), sortedDist[:t]).most_common()
+			coreIDCount = Counter(map(itemgetter(1), sortedDist[:t])).most_common()
 		except ValueError:
 			t = len(sortedDist)
 			coreIDCount = Counter(map(itemgetter(1), sortedDist)).most_common()
