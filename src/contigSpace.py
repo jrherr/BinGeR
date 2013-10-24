@@ -1157,7 +1157,7 @@ class ContigSpace(nx.Graph):
 		KNNModel.fit(trainingCovs, labelEncoder.transform(trainingLabels))
 		
 		if not options.quiet:
-			sys.stdout.write('Classifying...\n')
+			sys.stdout.write('Classifying contigs...\n')
 		
 		cmds = [[trainingSet, s, KNNModel, pfile] for s, pfile in zip(inputSets, pfiles)]
 		
@@ -1168,7 +1168,6 @@ class ContigSpace(nx.Graph):
 			pool.join()
 		else:
 			for i, cmd in enumerate(cmds):
-				print 'radiusKNN #'+str(i+1)
 				radiusKNN(cmd)
 		
 		if not options.quiet:
@@ -1446,6 +1445,8 @@ def edgesFromZScoreClustering(tri, tetra, columnLabels, threshold):
 # End of edgesFromZScoreClustering
 
 def normDist(x, y):
+	npx = np.array(x)
+	npy = np.array(y)
 	normedX = x/x.sum()
 	normedY = y/y.sum()
 	return distance.euclidean(normedX, normedY)/np.sqrt(np.dot(normedX, normedY))
