@@ -1464,7 +1464,7 @@ def KNNCoreID(inputSet, trainingSet, neighborsIndex):
 		selectedNeighborsLabels = map(itemgetter(0), selectedNeighbors)
 		inputLabel, inputCov = input
 		normMinkowski = [normDist(inputCov, x) for x in selectedNeighborsCovs]
-		sortedDist = sorted(zip(selectedNeighborsLabels, normMinkowski), key = lambda x: x[1], reverse = True)
+		sortedDist = sorted(zip(selectedNeighborsLabels, normMinkowski), key = lambda x: x[1])
 		sortedDistBool = [dist <= 0.05 for dist in map(itemgetter(1), sortedDist)]
 		print sortedDist
 		print sortedDistBool
