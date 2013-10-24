@@ -1157,7 +1157,7 @@ class ContigSpace(nx.Graph):
 		trainingLabels = map(itemgetter(0), trainingSet)
 		
 		labelEncoder = preprocessing.LabelEncoder()
-		labelEncoder = fit(trainingLabels)
+		labelEncoder.fit(trainingLabels)
 		
 		KNNModel = NearestNeighbors(n_neighbors = 20)
 		KNNModel.fit(trainingCovs, LabelEncoder.transform(trainingLabels))
