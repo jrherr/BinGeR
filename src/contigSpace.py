@@ -1083,29 +1083,39 @@ class ContigSpace(nx.Graph):
 		# get the coverage information
 		if not options.quiet:
 			sys.stdout.write('Loading contig coverage dynamics...\n')
-		contigCoverage = {}
-		for sample in projInfo.samples:
-			for index, readSample in enumerate(projInfo.samples):
-				coverageFile = projInfo.getCoverageFile(readSample, sample)
-				cfh = open(coverageFile, 'r')
-				# discard the header lines (2)
-				for k in range(2): disLine = cfh.readline()
-	
-				while 1:
-					line=cfh.readline().rstrip('\n')
-					if not line:
-						break
-					ele = line.split('\t')
-					contig = ele[0]
-					length = int(ele[1])
-					cov = float(ele[-1])
-					if index == 0:
-						contigCoverage[contig] = []
-					contigCoverage[contig].append(cov)
-				cfh.close()
-		if not options.quiet:
-			sys.stdout.write('Done.\n')
+		coveragePickle = projInfo.out_dir + '/allCoverage.cpickle'
 		
+		if os.path.exists(coveragePickle):
+			pfh = open(coveragePickle, 'rb')
+			contigCoverage = cPickle.load(pfh)
+			pfh.close()
+		else:
+			contigCoverage = {}
+			for sample in projInfo.samples:
+				for index, readSample in enumerate(projInfo.samples):
+					coverageFile = projInfo.getCoverageFile(readSample, sample)
+					cfh = open(coverageFile, 'r')
+					# discard the header lines (2)
+					for k in range(2): disLine = cfh.readline()
+					while 1:
+						line=cfh.readline().rstrip('\n')
+						if not line:
+							break
+						ele = line.split('\t')
+						contig = ele[0]
+						length = int(ele[1])
+						cov = float(ele[-1])
+						if index == 0:
+							contigCoverage[contig] = []
+						contigCoverage[contig].append(cov)
+					cfh.close()
+			
+			if not options.quiet:
+				sys.stdout.write('Done.\n')
+			pfh = open(coveragePickle, 'wb')
+			cPickle.dump(contigCoverage, pfh)
+			pfh.close()
+			
 		# construct training set for K-nearest neighbors
 		if not options.quiet:
 			sys.stdout.write('Constructing training sets...\n')
@@ -1143,9 +1153,10 @@ class ContigSpace(nx.Graph):
 		if not options.quiet:
 			sys.stdout.write('Training KNN model...\n')
 		trainingCovs = np.array(map(itemgetter(1), trainingSet))
-		for i in len(range(trainingCovs)):
+		for i in range(len(trainingCovs)):
 			trainingCovs[i] = trainingCovs[i]/trainingCovs[i].sum()
 		trainingLabels = map(itemgetter(0), trainingSet)
+		
 		labelEncoder = preprocess.LabelEncoder()
 		labelEncoder = fit(trainingLabels)
 		
