@@ -33,7 +33,7 @@ import cPickle
 import pysam
 
 def outputBins(projInfo, options):
-	"""
+	
 	binContigPath = projInfo.out_dir + '/binContigs'
 	
 	finalCoresPickle = projInfo.out_dir + '/finalCores.cpickle'
@@ -49,36 +49,43 @@ def outputBins(projInfo, options):
 		sys.stderr.write('FATAL: failure in unpickling the final cores.\n')
 		exit(0)
 	
-	for sample in projInfo.samples:
-		binPath = binContigPath + '/' + sample
+	for coreID in cores:
+		binPath = binContigPath + '/' + coreID
 		if not os.path.exists(binPath):
 			os.mdkir(binPath)
+	
+	# create file handles
+	ofhs = {}
+	for coreID in cores:
+		if coreID not in ofhs:
+			ofhs[coreID] = {}
+		for sample in projInfo.samples:
+			binContigFile = binContigPath + '/'+ coreID + '/' + sample + '.contigs.fa'
+			ofh = open(binContigFile, 'w')
+			ofhs[coreID][sample] = ofh
 			
 	contigIDs = {}
 	for coreID in cores:
 		for contigID in cores[coreID]:
-			contigIDs[contigID] = coreID
-			
-	# create file handles
-	ofhs = {}
-	for sample in projInfo.samples:
-		if sample not in ofhs:
-			ofhs[sample] = {}
-		for coreID in cores:
-			binContigFile = binContigPath + '/' + sample + '/' + 
-			if coreID not in ofhs[sample]:
-				
+			contigIDs[contigID] = coreID			
 	
 	for sample in projInfo.samples:
-			contigIDs[sample] = []
-			assemblyFile = projInfo.getAssemblyFile(sample)
-			afh = open(assemblyFile, 'r')
-			for record in SeqIO.parse(afh, "fasta"):
-				contigIDs[sample].append(record.id)
-			contigIDs[sample] = set(contigIDs[sample])
-			afh.close()
-	"""
-	sys.stdout.write('Code under construction\n')
+		contigIDs[sample] = []
+		assemblyFile = projInfo.getAssemblyFile(sample)
+		afh = open(assemblyFile, 'r')
+		for record in SeqIO.parse(afh, "fasta"):
+			if record.id not in contigIDs:
+				continue
+			coreID = contigIDs[record.id]
+			ofh = ofhs[coreID][sample]
+			ofh.write('>%s\n%s\n'%(record.id, record.seq))
+		afh.close()
+	
+	for coreID in ofhs:
+		for sample in ofhs[coreID]:
+			ofhs[coreID][sample].close()
+
+# End of outputBins
 
 def extractReadsForBins(projInfo, options):
 	sys.stdout.write('Code under construction\n')

@@ -1181,6 +1181,8 @@ class ContigSpace(nx.Graph):
 			for x in result:
 				contigID = x[0]
 				coreID = x[1]
+				if not coreID:
+					continue
 				self.cores[coreID].append(contigID)
 			os.path.remove(pfile)
 		
@@ -1200,7 +1202,7 @@ class ContigSpace(nx.Graph):
 		except:
 			sys.stderr.write('FATAL: failure in pickling final cores.\n')
 			exit(0)
-				
+	
 	# End of recruitContigs
 
 # End of class ContigSpace
@@ -1487,7 +1489,7 @@ def KNNCoreID(inputSet, trainingSet, neighborsIndex):
 			continue
 			
 		coreID = coreIDCount[0][0]
-		coreIDs.append((inputLabel, None))
+		coreIDs.append((inputLabel, coreID))
 		
 	return coreIDs
 					
