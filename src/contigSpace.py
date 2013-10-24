@@ -1447,8 +1447,8 @@ def edgesFromZScoreClustering(tri, tetra, columnLabels, threshold):
 def normDist(x, y):
 	npx = np.array(x)
 	npy = np.array(y)
-	normedX = x/x.sum()
-	normedY = y/y.sum()
+	normedX = npx/npx.sum()
+	normedY = npy/npy.sum()
 	return distance.euclidean(normedX, normedY)/np.sqrt(np.dot(normedX, normedY))
 	
 # End of normDist
