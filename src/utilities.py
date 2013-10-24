@@ -52,7 +52,7 @@ def outputBins(projInfo, options):
 	for coreID in cores:
 		binPath = binContigPath + '/' + coreID
 		if not os.path.exists(binPath):
-			os.mdkir(binPath)
+			os.mkdir(binPath)
 	
 	# create file handles
 	ofhs = {}
@@ -88,4 +88,88 @@ def outputBins(projInfo, options):
 # End of outputBins
 
 def extractReadsForBins(projInfo, options):
-	sys.stdout.write('Code under construction\n')
+	binReadPath = projInfo.out_dir + '/binReads'
+	
+	finalCoresPickle = projInfo.out_dir + '/finalCores.cpickle'
+	if not os.path.exists(finalCoresPickle):
+		sys.stderr.write('FATAL: failure in locating the final cores serialized results.\n')
+		exit(0)
+	
+	try:
+		pfh = open(finalCoresPickle, 'rb')
+		cores = cPickle.load(pfh)
+		pfh.close()
+	except:
+		sys.stderr.write('FATAL: failure in unpickling the final cores.\n')
+		exit(0)
+	
+	for coreID in cores:
+		binPath = binReadPath + '/' + coreID
+		if not os.path.exists(binPath):
+			os.mkdir(binPath)
+	
+	# create file handles
+	ofhs = {}
+	for coreID in cores:
+		if coreID not in ofhs:
+			ofhs[coreID] = {}
+		for sample in projInfo.samples:
+			binPEReadFile = binReadPath + '/'+ coreID + '/' + sample + '.PE.fa'
+			binSEReadFile = binReadPath + '/'+ coreID + '/' + sample + '.SE.fa'
+			ofh1 = open(binPEReadFile, 'w')
+			ofh2 = open(binSEReadFile, 'w')
+			ofhs[coreID][sample] = (ofh1, ofh2)
+	
+	# contigID lookup
+	contigIDs = {}
+	for coreID in cores:
+		for contigID in cores[coreID]:
+			contigIDs[contigID] = coreID			
+
+	for sample in projInfo.samples:
+		bamFile = projInfo.getBamFile(sample)
+		samfh = pysam.Samfile(bamFile, 'rb')
+		contigs = samfh.references()
+		PEReadLookup = {}
+		SEReadLookup = {}
+		for contigID in contigs:
+			if contigID not in contigIDs:
+				continue
+			coreID = contigIDs[contigID]
+			readIDs = samfh.fetch(contigID)
+			PEs, SEs = categorizeReads(readIDs)
+			for x in PEs: PEReadLookup[x] = coreID
+			for x in SEs: SEReadLookup[x] = coreID
+		samfh.close()
+		
+		readFile = projInfo.getReadFile(sample)
+		rfh = open(readFile, 'r')
+		while 1:
+			tag = rfh.readline().rstrip('\n')
+			if not tag:
+				break
+			tag = tag.replace('>', '')
+			seq = rfh.readline().rstrip('\n')
+			if tag not in PEReadLookup and tag not in SEReadLookup:
+				continue
+			elif tag in PEReadLookup:
+				coreID = PEReadLookup[tag]
+				ofh = ofhs[coreID][sample][0]
+				ofh.write('>%s\n%s\n' % (tag, seq))
+			elif tag in SEReadLookup:
+				coreID = SEReadLookup[tag]
+				ofh = ofhs[coreID][sample][1]
+				ofh.write('>%s\n%s\n' % (tag, seq))
+		rfh.close()
+	
+	for coreID in cores:
+		for sample in projInfo.samples:
+			ofhs[coreID][sample][0].close()
+			ofhs[coreID][sample][1].close()
+
+# End of extractReadsForBins
+
+def categorizeReads(readIDs):
+	
+	
+# End of categorizeReads

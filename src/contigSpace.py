@@ -1184,7 +1184,7 @@ class ContigSpace(nx.Graph):
 				if not coreID:
 					continue
 				self.cores[coreID].append(contigID)
-			os.remove(pfile)
+#			os.remove(pfile)
 		
 		
 		# pickle the results stored in self.cores
