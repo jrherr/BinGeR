@@ -59,7 +59,11 @@ def outputBins(projInfo, options):
 		for contigID in cores[coreID]:
 			contigIDs[contigID] = coreID			
 	
+	if not options.quiet:
+		sys.stdout.write('Now outputting contigs for each core...\n')
 	for sample in projInfo.samples:
+		if not options.quiet:
+			sys.stdout.write('[%s]\r' % sample)
 		ofhs = {}
 		for coreID in cores:
 			binContigFile = binContigPath + '/'+ coreID + '/' + sample + '.contigs.fa'
@@ -79,7 +83,11 @@ def outputBins(projInfo, options):
 	
 		for coreID in ofhs:
 			ofhs[coreID].close()
-
+	
+	sys.stdout.flush()
+	if not options.quiet:
+		sys.stdout.write('Done. Contigs stored at:\n %s\n' % binContigPath)
+	
 # End of outputBins
 
 def extractReadsForBins(projInfo, options):
@@ -103,6 +111,9 @@ def extractReadsForBins(projInfo, options):
 		if not os.path.exists(binPath):
 			os.mkdir(binPath)
 	
+	if not options.quiet:
+		sys.stdout.write('Now outputting contigs for each core...\n')
+	
 	# contigID lookup
 	contigIDs = {}
 	for coreID in cores:
@@ -110,6 +121,8 @@ def extractReadsForBins(projInfo, options):
 			contigIDs[contigID] = coreID			
 
 	for sample in projInfo.samples:
+		if not options.quiet:
+			sys.stdout.write('[%s]\r' % sample)
 		ofhs = {}
 		for coreID in cores:
 			binPEReadFile = binReadPath + '/'+ coreID + '/' + sample + '.PE.fa'
@@ -157,9 +170,25 @@ def extractReadsForBins(projInfo, options):
 			ofhs[coreID][0].close()
 			ofhs[coreID][1].close()
 
+	sys.stdout.flush()
+	if not options.quiet:
+		sys.stdout.write('Done. Contigs stored at:\n %s\n' % binContigPath)
+	
 # End of extractReadsForBins
 
-#def categorizeReads(readIDs):
+def categorizeReads(readIDs):
+	PEs = []
+	SEs = []
+	occurrences = {}
+	for readID in readIDs:
+		if readID[:-1] not in occurrences:
+			occurrences[readID[:-1]] = []
+		occurrences[readID[:-1]].append(readID)
 	
-	
+	for readID in occurrences:
+		if len(occurrences[readID]) == 1:
+			SEs += occurrences[readID]
+		else:
+			PEs += occurrences[readID]
+
 # End of categorizeReads

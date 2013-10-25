@@ -485,29 +485,23 @@ def main(argv = sys.argv[1:]):
 		if len(glob.glob(binContigPath + '/*.contigs.fa')) > 0:
 			pass
 		else:
-			sys.stdout.write('Now outputting bins and statistics...\n')
 			utilities.outputBins(projInfo, options)
-			sys.stdout.write('Done.\n')
+		
 	else:
-		sys.stdout.write('Now outputting bins and statistics...\n')
 		os.mkdir(binContigPath)
 		utilities.outputBins(projInfo, options)
-		sys.stdout.write('Done.\n')
-	
+		
 	# get all the reads for the bins
 	binReadPath = projInfo.out_dir + '/binReads'
 	if os.path.exists(binReadPath):
-		if len(glob.glob(binReadPath + '/*.reads.fa')) > 0:
+		if len(glob.glob(binReadPath + '/*.PE.fa')) > 0:
 			pass
 		else:
-			sys.stdout.write('Now extract reads for bins...\n')
-			utilities.extractReadsForBins(G, projInfo, options)
-			sys.stdout.write('Done.\n')
+			utilities.extractReadsForBins(projInfo, options)
 	else:
-		sys.stdout.write('Now extract reads for bins...\n')
 		os.mkdir(binReadPath)
 		utilities.extractReadsForBins(projInfo, options)
-		sys.stdout.write('Done.\n')
+	
 	total_finish_time = time()
 	sys.stdout.write("BinGeR finished at %s\n"%(ctime()))
 	sys.stdout.flush()

@@ -1188,7 +1188,7 @@ class ContigSpace(nx.Graph):
 				if not coreID:
 					continue
 				self.cores[coreID].append(contigID)
-#			os.remove(pfile)
+			os.remove(pfile)
 		
 		
 		# pickle the results stored in self.cores
@@ -1487,9 +1487,6 @@ def KNNCoreID(inputSet, trainingSet, neighborsIndex):
 		except ValueError:
 			t = len(sortedDist)
 			coreIDCount = Counter(map(itemgetter(0), sortedDist)).most_common()
-		print sortedDist
-		print sortedDistBool
-		print coreIDCount
 		
 		if coreIDCount[0][1] < 0.9 * t:
 			coreIDs.append((inputLabel, None))
