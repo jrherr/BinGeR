@@ -481,7 +481,7 @@ def main(argv = sys.argv[1:]):
 	utilities.outputBins(projInfo, options)
 	
 	# get all the reads for the bins
-	utilities.extractReadsForBins(ProjectInfo, options)
+	utilities.extractReadsForBins(ProjInfo, options)
 	
 	total_finish_time = time()
 	sys.stdout.write("BinGeR finished at %s\n"%(ctime()))
