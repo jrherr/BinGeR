@@ -31,6 +31,7 @@ import sys
 import os
 import cPickle
 import pysam
+import glob
 
 def outputBins(projInfo, options):
 	binContigPath = projInfo.out_dir + '/binContigs'
