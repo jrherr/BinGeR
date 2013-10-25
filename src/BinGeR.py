@@ -431,19 +431,6 @@ def main(argv = sys.argv[1:]):
 	if options.cpr_maxiter < 20 or options.cpr_maxiter > 100:
 		parser.error("Community PageRank tol must be a float in range [20, 100], you supplied %i" % options.cpr_maxiter)
 		exit(0)
-	"""
-	if options.mcl_expand < 2 or options.mcl_expand > 4:
-		parser.error("Markov Clustering Alogrithm expand factor must be a float in range [2, 4], you supplied %.2f" % options.mcl_expand)
-		exit(0)
-		
-	if options.mcl_inflation < 2 or options.mcl_inflation > 4:
-		parser.error("Markov Clustering Alogrithm inflation factor must be a float in range [2, 4], you supplied %.2f" % options.mcl_inflation)
-		exit(0)
-		
-	if options.mcl_width < 3 or options.mcl_width > 15:
-		parser.error("Markov Clustering Alogrithm expand factor must be an integer in range [3, 15], you supplied %i" % options.mcl_width)
-		exit(0)
-	"""
 	
 	total_start_time = time()
 	sys.stdout.write("BinGeR started at %s\n"%(ctime()))
@@ -482,6 +469,10 @@ def main(argv = sys.argv[1:]):
 	
 	# get all the reads for the bins
 	utilities.extractReadsForBins(projInfo, options)
+	
+	# clean up if necessary
+	if not options.save_intermediates:
+		utilities.cleanup(projInfo)
 	
 	total_finish_time = time()
 	sys.stdout.write("BinGeR finished at %s\n"%(ctime()))

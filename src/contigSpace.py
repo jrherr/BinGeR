@@ -954,12 +954,7 @@ class ContigSpace(nx.Graph):
 			exit(0)
 		
 		# create merged files
-		catNuc = open(projInfo.out_dir + '/genes.nuc.clustered/allGenes.fasta', 'w')
 		catProt = open(projInfo.out_dir + '/genes.prot.clustered/allGenes.fasta', 'w')
-		
-		for file in glob.glob(projInfo.out_dir + '/genes.nuc.clustered/*.fa'):
-			shutil.copyfileobj(open(file, 'rb'), catNuc)
-		catNuc.close()
 		
 		for file in glob.glob(projInfo.out_dir + '/genes.prot.clustered/*.fa'):
 			shutil.copyfileobj(open(file, 'rb'), catProt)

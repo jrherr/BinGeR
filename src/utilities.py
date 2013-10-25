@@ -206,3 +206,12 @@ def categorizeReads(readIDs):
 			PEs += occurrences[readID]
 
 # End of categorizeReads
+
+def cleanup(projInfo):
+	for pickle in glob.glob(projInfo.out_dir + '/*.cpickle'):
+		os.remove(pickle)
+	shutil.rmtree(projInfo.out_dir + '/blat')
+	shutil.rmtree(projInfo.out_dir + '/initCores')
+	shutil.rmtree(projInfo.out_dir + '/subgraphs')
+
+# End fo cleanup
