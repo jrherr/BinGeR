@@ -1484,6 +1484,7 @@ def KNNCoreID(inputSet, trainingSet, neighborsIndex):
 			t = len(sortedDist)
 			coreIDCount = Counter(map(itemgetter(1), sortedDist)).most_common()
 		
+		print coreIDCount, sortedDistBool, t
 		if coreIDCount[0][1] < 0.9 * t:
 			coreIDs.append((inputLabel, None))
 			continue
