@@ -33,9 +33,12 @@ import cPickle
 import pysam
 
 def outputBins(projInfo, options):
-	
 	binContigPath = projInfo.out_dir + '/binContigs'
-	
+	if os.path.exists(binContigPath):
+		if len(glob.glob(binContigPath + '/*')) > 0:		
+	else:
+		os.mkdir(binContigPath)
+
 	finalCoresPickle = projInfo.out_dir + '/finalCores.cpickle'
 	if not os.path.exists(finalCoresPickle):
 		sys.stderr.write('FATAL: failure in locating the final cores serialized results.\n')
@@ -92,7 +95,11 @@ def outputBins(projInfo, options):
 
 def extractReadsForBins(projInfo, options):
 	binReadPath = projInfo.out_dir + '/binReads'
-	
+	if os.path.exists(binReadPath):
+		if len(glob.glob(binReadPath + '/*')) > 0:		
+	else:
+		os.mkdir(binReadPath)
+		
 	finalCoresPickle = projInfo.out_dir + '/finalCores.cpickle'
 	if not os.path.exists(finalCoresPickle):
 		sys.stderr.write('FATAL: failure in locating the final cores serialized results.\n')
