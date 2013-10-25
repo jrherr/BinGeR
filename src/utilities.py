@@ -29,9 +29,11 @@ python BinGeR.py --help
 
 import sys
 import os
-import cPickle
-import pysam
 import glob
+import cPickle
+import shutil
+import pysam
+from Bio import SeqIO
 
 def outputBins(projInfo, options):
 	binContigPath = projInfo.out_dir + '/binContigs'
