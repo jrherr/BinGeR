@@ -35,7 +35,10 @@ import pysam
 def outputBins(projInfo, options):
 	binContigPath = projInfo.out_dir + '/binContigs'
 	if os.path.exists(binContigPath):
-		if len(glob.glob(binContigPath + '/*')) > 0:		
+		if len(glob.glob(binContigPath + '/*')) > 0:
+			return
+		else:
+			pass		
 	else:
 		os.mkdir(binContigPath)
 
@@ -97,6 +100,9 @@ def extractReadsForBins(projInfo, options):
 	binReadPath = projInfo.out_dir + '/binReads'
 	if os.path.exists(binReadPath):
 		if len(glob.glob(binReadPath + '/*')) > 0:		
+			return
+		else:
+			pass
 	else:
 		os.mkdir(binReadPath)
 		
