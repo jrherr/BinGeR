@@ -468,7 +468,7 @@ def main(argv = sys.argv[1:]):
 	utilities.outputBins(projInfo, options)
 	
 	# get all the reads for the bins
-	utilities.extractReadsForBins(projInfo, options)
+	#utilities.extractReadsForBins(projInfo, options)
 	
 	# clean up if necessary
 	if not options.save_intermediates:

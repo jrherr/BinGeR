@@ -66,10 +66,12 @@ def outputBins(projInfo, options):
 	contigIDs = {}
 	for coreID in cores:
 		for contigID in cores[coreID]:
-			contigIDs[contigID] = coreID			
+			contigIDs[contigID] = coreID
+	print len(contigIDs)		
 	
 	if not options.quiet:
 		sys.stdout.write('Now outputting contigs for each core...\n')
+	
 	for sample in projInfo.samples:
 		if not options.quiet:
 			sys.stdout.write('[%s]\r' % sample)
@@ -86,7 +88,7 @@ def outputBins(projInfo, options):
 			if record.id not in contigIDs:
 				continue
 			coreID = contigIDs[record.id]
-			ofh = ofhs[coreID][sample]
+			ofh = ofhs[coreID]
 			ofh.write('>%s\n%s\n'%(record.id, record.seq))
 		afh.close()
 	
@@ -174,11 +176,11 @@ def extractReadsForBins(projInfo, options):
 				continue
 			elif tag in PEReadLookup:
 				coreID = PEReadLookup[tag]
-				ofh = ofhs[coreID][sample][0]
+				ofh = ofhs[coreID][0]
 				ofh.write('>%s\n%s\n' % (tag, seq))
 			elif tag in SEReadLookup:
 				coreID = SEReadLookup[tag]
-				ofh = ofhs[coreID][sample][1]
+				ofh = ofhs[coreID][1]
 				ofh.write('>%s\n%s\n' % (tag, seq))
 		rfh.close()
 	
