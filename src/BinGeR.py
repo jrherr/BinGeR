@@ -477,6 +477,8 @@ def main(argv = sys.argv[1:]):
 		G.refineCores(projInfo, options)
 		G.recruitContigs(projInfo, options)
 	
+	return
+	
 	# output bins and the evaluation, extract reads of bins for downstream analysis.
 	binContigPath = projInfo.out_dir + '/binContigs'
 	if os.path.exists(binContigPath):
@@ -504,7 +506,7 @@ def main(argv = sys.argv[1:]):
 	else:
 		sys.stdout.write('Now extract reads for bins...\n')
 		os.mkdir(binReadPath)
-#		utilities.extractReadsForBins(projInfo, options)
+		utilities.extractReadsForBins(projInfo, options)
 		sys.stdout.write('Done.\n')
 	total_finish_time = time()
 	sys.stdout.write("BinGeR finished at %s\n"%(ctime()))
