@@ -53,16 +53,6 @@ def outputBins(projInfo, options):
 		binPath = binContigPath + '/' + coreID
 		if not os.path.exists(binPath):
 			os.mkdir(binPath)
-	
-	# create file handles
-	ofhs = {}
-	for coreID in cores:
-		if coreID not in ofhs:
-			ofhs[coreID] = {}
-		for sample in projInfo.samples:
-			binContigFile = binContigPath + '/'+ coreID + '/' + sample + '.contigs.fa'
-			ofh = open(binContigFile, 'w')
-			ofhs[coreID][sample] = ofh
 			
 	contigIDs = {}
 	for coreID in cores:
@@ -70,6 +60,12 @@ def outputBins(projInfo, options):
 			contigIDs[contigID] = coreID			
 	
 	for sample in projInfo.samples:
+		ofhs = {}
+		for coreID in cores:
+			binContigFile = binContigPath + '/'+ coreID + '/' + sample + '.contigs.fa'
+			ofh = open(binContigFile, 'w')
+			ofhs[coreID] = ofh
+			
 		contigIDs[sample] = []
 		assemblyFile = projInfo.getAssemblyFile(sample)
 		afh = open(assemblyFile, 'r')
@@ -81,9 +77,8 @@ def outputBins(projInfo, options):
 			ofh.write('>%s\n%s\n'%(record.id, record.seq))
 		afh.close()
 	
-	for coreID in ofhs:
-		for sample in ofhs[coreID]:
-			ofhs[coreID][sample].close()
+		for coreID in ofhs:
+			ofhs[coreID].close()
 
 # End of outputBins
 
@@ -108,18 +103,6 @@ def extractReadsForBins(projInfo, options):
 		if not os.path.exists(binPath):
 			os.mkdir(binPath)
 	
-	# create file handles
-	ofhs = {}
-	for coreID in cores:
-		if coreID not in ofhs:
-			ofhs[coreID] = {}
-		for sample in projInfo.samples:
-			binPEReadFile = binReadPath + '/'+ coreID + '/' + sample + '.PE.fa'
-			binSEReadFile = binReadPath + '/'+ coreID + '/' + sample + '.SE.fa'
-			ofh1 = open(binPEReadFile, 'w')
-			ofh2 = open(binSEReadFile, 'w')
-			ofhs[coreID][sample] = (ofh1, ofh2)
-	
 	# contigID lookup
 	contigIDs = {}
 	for coreID in cores:
@@ -127,6 +110,14 @@ def extractReadsForBins(projInfo, options):
 			contigIDs[contigID] = coreID			
 
 	for sample in projInfo.samples:
+		ofhs = {}
+		for coreID in cores:
+			binPEReadFile = binReadPath + '/'+ coreID + '/' + sample + '.PE.fa'
+			binSEReadFile = binReadPath + '/'+ coreID + '/' + sample + '.SE.fa'
+			ofh1 = open(binPEReadFile, 'w')
+			ofh2 = open(binSEReadFile, 'w')
+			ofhs[coreID] = (ofh1, ofh2)
+		
 		bamFile = projInfo.getBamFile(sample)
 		samfh = pysam.Samfile(bamFile, 'rb')
 		contigs = samfh.references()
@@ -162,10 +153,9 @@ def extractReadsForBins(projInfo, options):
 				ofh.write('>%s\n%s\n' % (tag, seq))
 		rfh.close()
 	
-	for coreID in cores:
 		for sample in projInfo.samples:
-			ofhs[coreID][sample][0].close()
-			ofhs[coreID][sample][1].close()
+			ofhs[coreID][0].close()
+			ofhs[coreID][1].close()
 
 # End of extractReadsForBins
 
