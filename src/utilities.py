@@ -197,7 +197,7 @@ def extractReadsForBins(projInfo, options):
 			binPEReadFile = binReadPath + '/'+ coreID + '/' + sample + '.PE.fa'
 			binSEReadFile = binReadPath + '/'+ coreID + '/' + sample + '.SE.fa'
 			
-			if numActiveHandle < NOFILE_LIMIT - 1:
+			if numActiveHandle < NOFILE_LIMIT - 2:
 				ofh1 = open(binPEReadFile, 'a')
 				ofh2 = open(binSEReadFile, 'a')
 				ofhs[ofhIndex1] = ofh1
