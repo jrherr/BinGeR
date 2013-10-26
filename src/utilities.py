@@ -211,7 +211,7 @@ def extractReadsForBins(projInfo, options):
 			sys.stdout.write('[%s]\r' % sample)
 			
 		bamFile = projInfo.getBamFile(sample)
-		samfh = pysam.Samfile(bamFile, 'rb')
+		samfh = pysam.Samfile(bamFile, 'r')
 		contigs = samfh.references()
 		PEReadLookup = {}
 		SEReadLookup = {}
