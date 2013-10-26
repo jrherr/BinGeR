@@ -32,8 +32,13 @@ import os
 import glob
 import cPickle
 import shutil
+import resource
+from operator import itemgetter
+
 import pysam
 from Bio import SeqIO
+
+NOFILE_LIMIT = resource.getrlimit(resource.RLIMIT_NOFILE)
 
 def outputBins(projInfo, options):
 	binContigPath = projInfo.out_dir + '/binContigs'
@@ -72,15 +77,29 @@ def outputBins(projInfo, options):
 	if not options.quiet:
 		sys.stdout.write('Now outputting contigs for each core...\n')
 	
-	for sample in projInfo.samples:
+	# dynamic file handle dict
+	numFileHandles = len(projInfo.samples) * len(cores)
+	ofhs = []
+	for i in numFileHandles:
+		ofhs.append(None)
+	
+	numActiveHandle = 0
+	coreIDs = cores.keys()
+	for i, sample in enumerate(projInfo.samples):
+		for j, coreID in enumerate(coreIDs):
+			ofhIndex = j + (i * len(projInfo.samples))
+			binContigFile = binContigPath + '/'+ coreID + '/' + sample + '.contigs.fa'
+			if numActiveHandle < NOFILE_LIMIT:
+				ofh = open(binContigFile, 'a')
+				ofhs[ofhIndex] = ofh
+				numActiveHandle += 1
+			else:
+				ofhs[ofhIndex] = None
+	
+	for i, sample in enumerate(projInfo.samples):
 		if not options.quiet:
 			sys.stdout.write('[%s]\r' % sample)
-		ofhs = {}
-		for coreID in cores:
-			binContigFile = binContigPath + '/'+ coreID + '/' + sample + '.contigs.fa'
-			ofh = open(binContigFile, 'w')
-			ofhs[coreID] = ofh
-			
+		
 		contigIDs[sample] = []
 		assemblyFile = projInfo.getAssemblyFile(sample)
 		afh = open(assemblyFile, 'r')
@@ -88,12 +107,43 @@ def outputBins(projInfo, options):
 			if record.id not in contigIDs:
 				continue
 			coreID = contigIDs[record.id]
-			ofh = ofhs[coreID]
-			ofh.write('>%s\n%s\n'%(record.id, record.seq))
+			j = coreIDs.index(coreID)
+			
+			# dynamically control filehandles, so the total # of active 
+			# handles is smaller than the resource limit
+			
+			ofhIndex = j + (i * len(projInfo.samples))
+			if ofhs[ofhIndex] == None:
+				binContigFile = binContigPath + '/'+ coreID + '/' + sample + '.contigs.fa'
+				# choose an active one to close
+				fhSuc = 0
+				for index, ofh in enumerate(ofhs[ofhIndex+1:]):
+					if ofh != None:
+						ofhs[index + ofhIndex + 1].close()
+						ofhs[index + ofhIndex + 1] = None
+						fhSuc = 1
+						break
+				if fhSuc == 0:
+					for index, ofh in enumerate(ofhs[:ofhIndex]):
+						if ofh != None:
+							ofhs[index].close()
+							ofhs[index] = None
+							fhSuc = 1
+							break
+				# and then open the one we need
+				ofhs[ofhIndex] = open(binContigFile, 'a')
+			else:
+				pass
+			
+			ofhs[ofhIndex].write('>%s\n%s\n'%(record.id, record.seq))
+		
 		afh.close()
 	
-		for coreID in ofhs:
-			ofhs[coreID].close()
+	# close up all filehandles
+	for sample in projInfo.samples:
+		for coreID in cores:
+			if ofhs[sample][coreID] != None:
+				ofhs[sample][coreID].close()
 	
 	sys.stdout.flush()
 	if not options.quiet:
@@ -132,23 +182,42 @@ def extractReadsForBins(projInfo, options):
 	if not options.quiet:
 		sys.stdout.write('Now outputting contigs for each core...\n')
 	
+	# dynamic file handle dict
+	numFileHandles = 2 * len(projInfo.samples) * len(cores)
+	ofhs = []
+	for i in numFileHandles:
+		ofhs.append(None)
+	
+	numActiveHandle = 0
+	coreIDs = cores.keys()
+	for i, sample in enumerate(projInfo.samples):
+		for j, coreID in enumerate(coreIDs):
+			
+			ofhIndex1 = 2 * (j + (i * len(projInfo.samples)))
+			ofhIndex2 = ofhIndex1 + 1
+			binPEReadFile = binReadPath + '/'+ coreID + '/' + sample + '.PE.fa'
+			binSEReadFile = binReadPath + '/'+ coreID + '/' + sample + '.SE.fa'
+			
+			if numActiveHandle < NOFILE_LIMIT - 1:
+				ofh1 = open(binPEReadFile, 'a')
+				ofh2 = open(binSEReadFile, 'a')
+				ofhs[ofhIndex1] = ofh1
+				ofhs[ofhIndex2] = ofh2
+				numActiveHandle += 2
+			else:
+				ofhs[ofhIndex1] = None
+				ofhs[ofhIndex2] = None
+	
 	# contigID lookup
 	contigIDs = {}
 	for coreID in cores:
 		for contigID in cores[coreID]:
 			contigIDs[contigID] = coreID			
 
-	for sample in projInfo.samples:
+	for i, sample in enumerate(projInfo.samples):
 		if not options.quiet:
 			sys.stdout.write('[%s]\r' % sample)
-		ofhs = {}
-		for coreID in cores:
-			binPEReadFile = binReadPath + '/'+ coreID + '/' + sample + '.PE.fa'
-			binSEReadFile = binReadPath + '/'+ coreID + '/' + sample + '.SE.fa'
-			ofh1 = open(binPEReadFile, 'w')
-			ofh2 = open(binSEReadFile, 'w')
-			ofhs[coreID] = (ofh1, ofh2)
-		
+			
 		bamFile = projInfo.getBamFile(sample)
 		samfh = pysam.Samfile(bamFile, 'rb')
 		contigs = samfh.references()
@@ -172,16 +241,49 @@ def extractReadsForBins(projInfo, options):
 				break
 			tag = tag.replace('>', '')
 			seq = rfh.readline().rstrip('\n')
+			
 			if tag not in PEReadLookup and tag not in SEReadLookup:
 				continue
 			elif tag in PEReadLookup:
 				coreID = PEReadLookup[tag]
-				ofh = ofhs[coreID][0]
-				ofh.write('>%s\n%s\n' % (tag, seq))
+				j = coreIDs.index(coreID)
+				ofhIndex = 2 * (j + (i * len(projInfo.samples)))
 			elif tag in SEReadLookup:
 				coreID = SEReadLookup[tag]
-				ofh = ofhs[coreID][1]
-				ofh.write('>%s\n%s\n' % (tag, seq))
+				j = coreIDs.index(coreID)
+				ofhIndex = 1+ 2 * (j + (i * len(projInfo.samples)))
+			
+			############### CONSTRUCTION SITE #############
+			if ofhs[ofhIndex] == None:
+				if ofhIndex % 2 == 0:
+					readFile = binReadPath + '/'+ coreID + '/' + sample + '.PE.fa'
+				else:
+					readFile = binReadPath + '/'+ coreID + '/' + sample + '.SE.fa'
+				
+				# choose an active one to close
+				fhSuc = 0
+				for index in range(ofhIndex+2, len(ofhs), 2):
+					if ofhs[index] != None:
+						ofhs[index].close()
+						ofhs[index] = None
+						fhSuc = 1
+						break
+				if fhSuc == 0:
+					if ofhIndex % 2 == 0:
+						startIndex = 0
+					esle:
+						startIndex = 1
+					for index in range(startIndex, ofhIndex, 2):
+						if ofhs[index] != None:
+							ofhs[index].close()
+							ofhs[index] = None
+							fhSuc = 1
+							break
+				# and then open the one we need
+				ofhs[ofhIndex] = open(readFile, 'a')
+			else:
+				ofhs[ofhIndex].write('>%s\n%s\n' % (tag, seq))
+		
 		rfh.close()
 	
 		for sample in projInfo.samples:
