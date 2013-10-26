@@ -38,7 +38,7 @@ from operator import itemgetter
 import pysam
 from Bio import SeqIO
 
-NOFILE_LIMIT = resource.getrlimit(resource.RLIMIT_NOFILE)
+NOFILE_LIMIT, NOVFILE_LIMIT = resource.getrlimit(resource.RLIMIT_NOFILE)
 
 def outputBins(projInfo, options):
 	binContigPath = projInfo.out_dir + '/binContigs'
