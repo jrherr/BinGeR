@@ -82,17 +82,14 @@ def outputBins(projInfo, options):
 	for i in range(numFileHandles):
 		ofhs.append(None)
 	
-	numActiveHandle = 0
 	coreIDs = cores.keys()
 	for i, sample in enumerate(projInfo.samples):
 		for j, coreID in enumerate(coreIDs):
 			ofhIndex = j + (i * len(projInfo.samples))
 			binContigFile = binContigPath + '/'+ coreID + '/' + sample + '.contigs.fa'
-			if numActiveHandle < NOFILE_LIMIT:
-				ofh = open(binContigFile, 'a')
-				ofhs[ofhIndex] = ofh
-				numActiveHandle += 1
-			else:
+			try:
+				ofhs[ofhIndex] = open(binContigFile, 'a')
+			except IOError:
 				ofhs[ofhIndex] = None
 	
 	for i, sample in enumerate(projInfo.samples):
@@ -187,7 +184,6 @@ def extractReadsForBins(projInfo, options):
 	for i in range(numFileHandles):
 		ofhs.append(None)
 	
-	numActiveHandle = 0
 	coreIDs = cores.keys()
 	for i, sample in enumerate(projInfo.samples):
 		for j, coreID in enumerate(coreIDs):
@@ -197,13 +193,10 @@ def extractReadsForBins(projInfo, options):
 			binPEReadFile = binReadPath + '/'+ coreID + '/' + sample + '.PE.fa'
 			binSEReadFile = binReadPath + '/'+ coreID + '/' + sample + '.SE.fa'
 			
-			if numActiveHandle < NOFILE_LIMIT - 2:
-				ofh1 = open(binPEReadFile, 'a')
-				ofh2 = open(binSEReadFile, 'a')
-				ofhs[ofhIndex1] = ofh1
-				ofhs[ofhIndex2] = ofh2
-				numActiveHandle += 2
-			else:
+			try:
+				ofhs[ofhIndex1] = open(binPEReadFile, 'a')
+				ofhs[ofhIndex2] = open(binSEReadFile, 'a')
+			except IOError:
 				ofhs[ofhIndex1] = None
 				ofhs[ofhIndex2] = None
 	
