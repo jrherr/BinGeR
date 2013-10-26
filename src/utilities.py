@@ -139,10 +139,10 @@ def outputBins(projInfo, options):
 		afh.close()
 	
 	# close up all filehandles
-	for sample in projInfo.samples:
-		for coreID in cores:
-			if ofhs[sample][coreID] != None:
-				ofhs[sample][coreID].close()
+	for ofh in ofhs:
+		if ofh == None:
+			continue	
+		ofh.close()
 	
 	sys.stdout.flush()
 	if not options.quiet:
@@ -284,11 +284,13 @@ def extractReadsForBins(projInfo, options):
 				ofhs[ofhIndex].write('>%s\n%s\n' % (tag, seq))
 		
 		rfh.close()
-	
-		for sample in projInfo.samples:
-			ofhs[coreID][0].close()
-			ofhs[coreID][1].close()
 
+	# close up all filehandles
+	for ofh in ofhs:
+		if ofh == None:
+			continue	
+		ofh.close()
+		
 	sys.stdout.flush()
 	if not options.quiet:
 		sys.stdout.write('Done. Contigs stored at:\n %s\n' % binContigPath)
