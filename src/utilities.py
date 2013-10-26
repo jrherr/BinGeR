@@ -72,7 +72,6 @@ def outputBins(projInfo, options):
 	for coreID in cores:
 		for contigID in cores[coreID]:
 			contigIDs[contigID] = coreID
-	print len(contigIDs)		
 	
 	if not options.quiet:
 		sys.stdout.write('Now outputting contigs for each core...\n')
@@ -80,7 +79,7 @@ def outputBins(projInfo, options):
 	# dynamic file handle dict
 	numFileHandles = len(projInfo.samples) * len(cores)
 	ofhs = []
-	for i in numFileHandles:
+	for i in range(numFileHandles):
 		ofhs.append(None)
 	
 	numActiveHandle = 0
@@ -185,7 +184,7 @@ def extractReadsForBins(projInfo, options):
 	# dynamic file handle dict
 	numFileHandles = 2 * len(projInfo.samples) * len(cores)
 	ofhs = []
-	for i in numFileHandles:
+	for i in range(numFileHandles):
 		ofhs.append(None)
 	
 	numActiveHandle = 0
