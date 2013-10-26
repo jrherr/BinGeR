@@ -271,7 +271,7 @@ def extractReadsForBins(projInfo, options):
 				if fhSuc == 0:
 					if ofhIndex % 2 == 0:
 						startIndex = 0
-					esle:
+					else:
 						startIndex = 1
 					for index in range(startIndex, ofhIndex, 2):
 						if ofhs[index] != None:
