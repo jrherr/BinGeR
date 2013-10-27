@@ -218,7 +218,7 @@ def extractReadsForBins(projInfo, options):
 
 	for i, sample in enumerate(projInfo.samples):
 		if not options.quiet:
-			sys.stdout.write('[%s]\n' % sample)
+			sys.stdout.write('Working on sample: %s\r' % sample)
 			
 		bamFile = projInfo.getBamFile(sample)
 		
@@ -244,8 +244,10 @@ def extractReadsForBins(projInfo, options):
 			PEs, SEs = categorizeReads(readIDs)
 			for x in PEs: PEReadLookup[x] = coreID
 			for x in SEs: SEReadLookup[x] = coreID
+			print PEs[:4]
 		
 		samfh.close()
+		print 'Finsihed reading the samfile'
 		
 		readFile = projInfo.getReadFile(sample)
 		rfh = open(readFile, 'r')
@@ -299,7 +301,10 @@ def extractReadsForBins(projInfo, options):
 				ofhs[ofhIndex].write('>%s\n%s\n' % (tag, seq))
 		
 		rfh.close()
-
+		
+		if not options.quiet:
+			sys.stdout.flush()
+			
 	# close up all filehandles
 	for ofh in ofhs:
 		if ofh == None:
@@ -307,6 +312,7 @@ def extractReadsForBins(projInfo, options):
 		ofh.close()
 		
 	sys.stdout.flush()
+	
 	if not options.quiet:
 		sys.stdout.write('Done. Reads stored at:\n %s\n' % binReadPath)
 	
