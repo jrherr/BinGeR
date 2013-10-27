@@ -95,7 +95,7 @@ def outputBins(projInfo, options):
 	
 	for i, sample in enumerate(projInfo.samples):
 		if not options.quiet:
-			sys.stdout.write('[%s]\r' % sample)
+			sys.stdout.write('[%s]\n' % sample)
 		
 		contigIDs[sample] = []
 		assemblyFile = projInfo.getAssemblyFile(sample)
@@ -200,6 +200,7 @@ def extractReadsForBins(projInfo, options):
 			except IOError:
 				ofhs[ofhIndex1] = None
 				ofhs[ofhIndex2] = None
+	print "Done preparing file handles."
 	
 	# contigID lookup
 	contigIDs = {}
@@ -209,7 +210,7 @@ def extractReadsForBins(projInfo, options):
 
 	for i, sample in enumerate(projInfo.samples):
 		if not options.quiet:
-			sys.stdout.write('[%s]\r' % sample)
+			sys.stdout.write('[%s]\n' % sample)
 			
 		bamFile = projInfo.getBamFile(sample)
 		
