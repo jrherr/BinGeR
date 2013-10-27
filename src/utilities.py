@@ -96,7 +96,8 @@ def outputBins(projInfo, options):
 	
 	for i, sample in enumerate(projInfo.samples):
 		if not options.quiet:
-			sys.stdout.write('[%s]\n' % sample)
+			sys.stdout.flush()
+			sys.stdout.write('Now working on sample: %s\r' % sample)
 		
 		contigIDs[sample] = []
 		assemblyFile = projInfo.getAssemblyFile(sample)
@@ -163,6 +164,7 @@ def outputBins(projInfo, options):
 
 def extractReadsForBins(projInfo, options):
 	binReadPath = projInfo.out_dir + '/binReads'
+	"""
 	if os.path.exists(binReadPath):
 		if len(glob.glob(binReadPath + '/*')) > 0:		
 			return
@@ -170,7 +172,7 @@ def extractReadsForBins(projInfo, options):
 			pass
 	else:
 		os.mkdir(binReadPath)
-		
+	"""
 	finalCoresPickle = projInfo.out_dir + '/finalCores.cpickle'
 	if not os.path.exists(finalCoresPickle):
 		sys.stderr.write('FATAL: failure in locating the final cores serialized results.\n')
@@ -223,7 +225,12 @@ def extractReadsForBins(projInfo, options):
 			contigIDs[contigID] = coreID			
 
 	for i, sample in enumerate(projInfo.samples):
+		# for test purpose
+		if i <= 5:
+			continue
+		
 		if not options.quiet:
+			sys.stdout.flush()
 			sys.stdout.write('Working on sample: %s\r' % sample)
 			
 		bamFile = projInfo.getBamFile(sample)
@@ -307,7 +314,7 @@ def extractReadsForBins(projInfo, options):
 				# write to PE file
 				for SE in SEs:
 					ofhs[ofhIndex].write('>%s\n%s\n'%(SE[0], SE[1]))
-		sys.stdout.flush()
+		
 		samfh.close()
 		
 	# close up all filehandles

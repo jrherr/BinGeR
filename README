@@ -13,7 +13,7 @@ Copyright: Chengwei Luo, Konstantinidis Lab, Georgia Institute of Technology, 20
 
 Contact: Chengwei Luo (Email: luo.chengwei@gatech.edu)
 
-How to install
+[How to install]
 ==========================
 Dependencies:
 
@@ -29,9 +29,11 @@ Scipy >= 0.12.0
 BioPython >= 1.58
 scikit-learn >= 0.14
 
-Packages with other versions might work, but not tested. You can certainly manually install all of the packages, however, I recommend using Anaconda, which is a Python distribution for big data processing, it bundles many packages for data scientists. For more information, go to:
+Packages with older versions might work, but not tested. You can certainly manually install all of the packages, however, I recommend using Anaconda, which is a Python distribution for big data processing, it bundles many packages for data scientists. For more information, go to:
 
 https://store.continuum.io/cshop/anaconda/
+
+Anaconda includes all the dependencies to run BinGeR.
 
 To install, unzip/untar/uncompress the BinGeR package, and in terminal cd to the unpacked directory, and run:
 
@@ -43,7 +45,7 @@ $ python setup.py install --prefix = user/defined/installation/directory
 
 If you have everything ready, this should take care of the installation.
 
-How to run
+[How to run]
 ==========================
 After running setup.py, you may want to either open a new tab in the terminal, or in current terminal tab:
 $ source ~/.profile
@@ -57,15 +59,17 @@ $ BinGeR.py --help
 
 This should print out a detailed settings for you.
 
-Contents of db folder
+Note: to start with a project, you will need to use the scripts in the utils directory to produce the files first
+
+[Contents of db folder]
 ==========================
 In db/, you will find a few db files:
 HMM.txt
 ncbiNodes.lib
 ncbiSciNames.lib
+singleCopy.prot.tar.gz
 
-
-Contents of utils folder
+[Contents of utils folder]
 ==========================
 In utils/, you will see a few Python scripts, as listed below:
 
@@ -76,3 +80,7 @@ interleaveReads.py
 renameContigs.py
 
 They are utility scripts that will assist you in preparing the input files necessary for BinGeR.
+
+For detailed usage of each utils script, please run:
+
+$ utils/script --help
