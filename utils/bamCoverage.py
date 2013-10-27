@@ -109,8 +109,8 @@ def main(argv = sys.argv[1:]):
 		parser.error("A list of samples and a working directory are required!")
 		exit(0)
 		
-	if options.out_dir is None:
-		parser.error("An output directory is required to supply!")
+	if options.bams_dir is None:
+		parser.error("An BAM file directory is required to supply!")
 		exit(0)
 	
 	if options.num_proc < 1:
