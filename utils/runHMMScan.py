@@ -72,24 +72,26 @@ def runProdigal(x):
 	os.remove(infile+'.gbk')
 	os.remove(infile+'.log')
 	
+	faa = open(infile + '.prodigal.faa', 'w')
+	tempfaa = open(infile + '.faa', 'r')
+	for record in SeqIO.parse(tempfaa, 'fasta'):
+		tag = record.description
+		seq = record.seq
+		tag = re.sub(r'\s\#\s(\d+)\s\#\s(\d+)\s\#\s(\-?\d+)\s\#\s', r'|\1-\2|\3|', tag)
+		faa.write('>%s\n%s\n'%(tag, seq))
+	faa.close()
+	tempfaa.close()
+	
+	os.remove(infile+'.faa')
+	
 # End of runProdigal
 
 def runHMMScan(x):
 	infile, outfile, db, prodigal, hmmscan = x
 	runProdigal([infile, prodigal])
-	faa = open(infile + '.prodigal.faa', 'w')
-	tempfaa = open(infile + '.faa', 'r')
-	for record in SeqIO.parse(tempfaa, 'fasta'):
-		tag = record.id
-		seq = record.seq
-		tag = re.sub('\s\#\s(\d+)\s\#\s(\d+)\s\#\s(\-?\d+)\s\#\s', '|\1-\2|\3|', tag)
-		faa.write('>%s\n%s\n'%(tag, seq))
-	faa.close()
-	tempfaa.close()
-	
-	os.remove(tempfaa)
 	
 	# run hmmscan here
+	faa = infile + '.prodigal.faa'
 	cmd = [hmmscan, "--tblout", outfile, "--cut_tc", db, faa]
 	try:
 		retcode = call(cmd, stdout = open(outfile+'.stdout', 'a'))
@@ -99,6 +101,8 @@ def runHMMScan(x):
 	except ValueError:
 		sys.stderr.write( "ValueError: fatal error running hmmscan.\n" )
 		exit(0)
+		
+	os.remove(infile+'.prodigal.faa')
 	os.remove(outfile+'.stdout')
 	
 def main(argv = sys.argv[1:]):
@@ -117,7 +121,9 @@ def main(argv = sys.argv[1:]):
 							help = "Output file with Z-scores of each input sequence.")
 
 	requiredOptions.add_option("-d", "--hmm_db", type = "string", metavar = "FILE",
-							help = "The single copy gene HMM model file.")
+							help = "The single copy gene HMM model file. \
+							You can find it in BinGeR/utils/SingleCopyGenes.HMM.\
+							 You can, however, always usa your own one.")
 
 	parser.add_option_group(requiredOptions)
 
@@ -205,7 +211,8 @@ def main(argv = sys.argv[1:]):
 			for line in open(outfile,'r'):
 				ofh.write(line)
 		ofh.close()
-		for infile in files:
+		
+		for infile in infiles:
 			os.remove(infile)
 		for outfile in outfiles:
 			os.remove(outfile)

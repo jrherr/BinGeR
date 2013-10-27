@@ -223,7 +223,8 @@ def main(argv = sys.argv[1:]):
 			for line in open(outfile,'r'):
 				ofh.write(line)
 		ofh.close()
-		for infile in files:
+		
+		for infile in infiles:
 			os.remove(infile)
 		for outfile in outfiles:
 			os.remove(outfile)
