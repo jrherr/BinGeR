@@ -209,7 +209,6 @@ def extractReadsForBins(projInfo, options):
 			else:
 				ofhs[ofhIndex1] = None
 				ofhs[ofhIndex2] = None
-	print "Done preparing file handles."
 	
 	# contigID lookup
 	contigIDs = {}
@@ -241,8 +240,8 @@ def extractReadsForBins(projInfo, options):
 				readIDs.append(read.qname)
 			print contigID, len(readIDs), readIDs[0]
 			PEs, SEs = categorizeReads(readIDs)
-			print PEs
-			print SEs
+			print PEs[:10]
+			print SEs[:10]
 			for x in PEs: PEReadLookup[x] = coreID
 			for x in SEs: SEReadLookup[x] = coreID
 		samfh.close()
@@ -325,7 +324,7 @@ def categorizeReads(readIDs):
 			SEs += occurrences[readID]
 		else:
 			PEs += occurrences[readID]
-
+	return PEs, SEs
 # End of categorizeReads
 
 def cleanup(projInfo):
