@@ -211,12 +211,15 @@ def extractReadsForBins(projInfo, options):
 			sys.stdout.write('[%s]\r' % sample)
 			
 		bamFile = projInfo.getBamFile(sample)
+		
 		try:
-			samfh = pysam.Samfile(bamFile, 'rb')
+			samfh = pysam.Samfile(os.realpath(bamFile), 'rb')
 		except IOError:
 			sys.stderr.write('Failure in opening:\n\t%s\n' % bamFile)
 			continue
+		
 		contigs = samfh.references
+		
 		PEReadLookup = {}
 		SEReadLookup = {}
 		for contigID in contigs:
