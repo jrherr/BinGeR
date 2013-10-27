@@ -112,7 +112,7 @@ def oligoStat(x):
 	infile, outfile = x
 	ifh = open(infile, 'r')
 	ofh = open(outfile, 'w')
-	for record in SeqIO.parser(ifh, 'fasta'):
+	for record in SeqIO.parse(ifh, 'fasta'):
 		tag = record.id
 		seq = record.seq
 		tetraFreq = tetra(seq)
