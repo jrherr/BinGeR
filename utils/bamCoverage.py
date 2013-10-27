@@ -47,6 +47,7 @@ Copyright: Chengwei Luo, Konstantinidis Lab, Georgia Institute of Technology, 20
 
 import sys
 import os
+import glob
 from optparse import OptionParser, OptionGroup
 import multiprocessing as mp
 import pysam
