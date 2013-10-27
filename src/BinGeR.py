@@ -84,12 +84,6 @@ class ProjectInfo:
 		self.DBs = {}
 		
 	def initPaths(self, options):
-		if os.path.exists(options.reads_dir):
-			self.reads_dir = os.path.abspath(options.reads_dir)
-		else:
-			sys.stderr.write("FATAL: cannot find reads directory:%s\n"%options.reads_dir)
-			exit(0)
-		
 		if os.path.exists(options.bams_dir):
 			self.bams_dir = os.path.abspath(options.bams_dir)
 		else:
