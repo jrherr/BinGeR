@@ -330,12 +330,14 @@ def categorizeReads(readIDs):
 	for readID in occurrences:
 		if len(occurrences[readID]) == 1:
 			SEs += occurrences[readID]
-		else:
+		elif len(occurrences[readID]) ==2:
 			r1, r2 = occurrences[readID]
 			if r1[0][-1] == '2':
 				PEs += [r2, r1]
 			else:
 				PEs += [r1, r2]
+		else:
+			print occurrences[readID]
 
 	return PEs, SEs
 # End of categorizeReads
