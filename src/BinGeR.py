@@ -149,22 +149,6 @@ class ProjectInfo:
 		else:
 			return bamFiles[0]
 			
-	def getReadFile(self, sample):
-		readFiles = glob.glob(self.reads_dir+'/'+sample+'[.]*[.]fa')
-		if len(readFiles) == 0:
-			readFiles = glob.glob(self.reads_dir+'/'+sample+'[.]fa')
-		if len(readFiles) == 0:
-			sys.stderr.write("FATAL: fail to locate read file for sample:%s\n"%sample)
-			exit(0)
-		elif len(readFiles) > 1:
-			sys.stderr.write("FATAL: ambiguity in locating reads for sample:%s\n"%sample)
-			sys.stderr.write("\tBinGeR found:\n")
-			for readFile in readFiles:
-				sys.stderr.write("\t%s\n"%readFile)
-			exit(0)
-		else:
-			return readFiles[0]
-	
 	def getAssemblyFile(self, sample):
 		assemblyFiles = glob.glob(self.assemblies_dir+'/'+sample+'[.]*[.]fa')
 		if len(assemblyFiles) == 0:
@@ -175,8 +159,8 @@ class ProjectInfo:
 		elif len(assemblyFiles) > 1:
 			sys.stderr.write("FATAL: ambiguity in locating assembly for sample:%s\n"%sample)
 			sys.stderr.write("\tBinGeR found:\n")
-			for readFile in assemblyFiles:
-				sys.stderr.write("\t%s\n"%readFile)
+			for assemblyFile in assemblyFiles:
+				sys.stderr.write("\t%s\n"%assemblyFile)
 			exit(0)
 		else:
 			return assemblyFiles[0]
@@ -252,7 +236,6 @@ class ProjectInfo:
 		
 		sys.stdout.write("Checking if every file in place...\n")
 		for sample in self.samples:
-			readFile = self.getReadFile(sample)
 			bamFile = self.getBamFile(sample)
 			assemblyFile = self.getAssemblyFile(sample)
 			zscoreFile = self.getZScoreFile(sample)
@@ -316,9 +299,6 @@ def main(argv = sys.argv[1:]):
 	# Optional arguments that need to be supplied if not the same as default
 	optOptions = OptionGroup(parser, "Optional parameters",
 						"There options are optional, and may be supplied in any order.")
-
-	optOptions.add_option("-r", "--reads_dir", type = "string", default = "Reads/", metavar = "DIR",
-							help = "Directory where coupled reads (interleaved) in fasta format are, the naming should follow \"sample.*.fa\" convention. [Default: ./Reads]")
 
 	optOptions.add_option("-b", "--bams_dir", type = "string", default = "Bams", metavar = "DIR",
 							help = "Directory where sorted bam files (reads versus assembly, same sample) are, the naming should follow \"sample.*.bam\" convention. [Default: ./Bams]")
