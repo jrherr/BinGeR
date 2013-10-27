@@ -219,7 +219,7 @@ def extractReadsForBins(projInfo, options):
 		bamFile = projInfo.getBamFile(sample)
 		
 		try:
-			samfh = pysam.Samfile(bamFile, 'r')
+			samfh = pysam.Samfile(bamFile, 'rb')
 		except IOError:
 			sys.stderr.write('Failure in opening:\n\t%s\n' % bamFile)
 			continue
