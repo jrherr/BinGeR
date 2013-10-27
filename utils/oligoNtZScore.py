@@ -114,7 +114,7 @@ def oligoStat(x):
 	ofh = open(outfile, 'w')
 	for record in SeqIO.parse(ifh, 'fasta'):
 		tag = record.id
-		seq = record.seq
+		seq = str(record.seq).upper()
 		tetraFreq = tetra(seq)
 		triFreq = tri(seq)
 		triZ = scipy.stats.zscore(triFreq)
