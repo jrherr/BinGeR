@@ -231,6 +231,8 @@ def extractReadsForBins(projInfo, options):
 			for read in samfh.fetch(contigID):
 				readIDs.append(read.qname)
 			PEs, SEs = categorizeReads(readIDs)
+			print PEs
+			print SEs
 			for x in PEs: PEReadLookup[x] = coreID
 			for x in SEs: SEReadLookup[x] = coreID
 		samfh.close()
