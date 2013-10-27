@@ -84,13 +84,15 @@ def outputBins(projInfo, options):
 		ofhs.append(None)
 	
 	coreIDs = cores.keys()
+	activeFileHandles = 0
 	for i, sample in enumerate(projInfo.samples):
 		for j, coreID in enumerate(coreIDs):
 			ofhIndex = j + (i * len(projInfo.samples))
 			binContigFile = binContigPath + '/'+ coreID + '/' + sample + '.contigs.fa'
-			try:
+			if activeFileHandles < NOFILE_LIMIT - 4:
 				ofhs[ofhIndex] = open(binContigFile, 'a')
-			except IOError:
+				activeFileHandles += 1
+			else:
 				ofhs[ofhIndex] = None
 	
 	for i, sample in enumerate(projInfo.samples):
@@ -186,6 +188,7 @@ def extractReadsForBins(projInfo, options):
 		ofhs.append(None)
 	
 	coreIDs = cores.keys()
+	activeFileHandles = 0
 	for i, sample in enumerate(projInfo.samples):
 		for j, coreID in enumerate(coreIDs):
 			
@@ -194,10 +197,11 @@ def extractReadsForBins(projInfo, options):
 			binPEReadFile = binReadPath + '/'+ coreID + '/' + sample + '.PE.fa'
 			binSEReadFile = binReadPath + '/'+ coreID + '/' + sample + '.SE.fa'
 			
-			try:
+			if activeFileHandles < NOFILE_LIMIT -6:
 				ofhs[ofhIndex1] = open(binPEReadFile, 'a')
 				ofhs[ofhIndex2] = open(binSEReadFile, 'a')
-			except IOError:
+				activeFileHandles += 2
+			else:
 				ofhs[ofhIndex1] = None
 				ofhs[ofhIndex2] = None
 	print "Done preparing file handles."
@@ -221,7 +225,6 @@ def extractReadsForBins(projInfo, options):
 			continue
 		
 		contigs = samfh.references
-		
 		PEReadLookup = {}
 		SEReadLookup = {}
 		for contigID in contigs:

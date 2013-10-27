@@ -376,17 +376,6 @@ def main(argv = sys.argv[1:]):
 	clusteringOptions.add_option("-i", "--cpr_maxiter", type = "int", default = 50, metavar = 'INT',
 							help = "The max iterations performed in community personalized PageRank [default: 50, range: (20, 100)].")
 
-	"""	
-	clusteringOptions.add_option("-e", "--mcl_expand", type = "float", default = 2., metavar = 'FLOAT',
-							help = "The expanding factor in Markov Clustering (MCL) alogrithm [default: 2, range: (2, 4)].")
-	
-	clusteringOptions.add_option("-i", "--mcl_inflation", type = "float", default = 2., metavar = 'FLOAT',
-							help = "The inflation factor in Markov Clustering (MCL) alogrithm [default: 2, range: (2, 4)].")
-	
-	clusteringOptions.add_option("-w", "--mcl_width", type = "int", default = 5, metavar = 'INT',
-							help = "The step width in Markov Clustering (MCL) alogrithm [default: 5, range(3, 15)].")
-	"""	
-	
 	parser.add_option_group(clusteringOptions)
 
 	# runtime settings that could affect the file saving and message printing
