@@ -56,7 +56,7 @@ import string
 
 def reverseComp(seq):
 	seq=seq[-1::-1]
-	seq=seq.translate(string.maketrans("ATGC","TACG"))
+	seq=str(seq).translate(string.maketrans("ATGC","TACG"))
 	return seq
 # End of reverseComp
 
