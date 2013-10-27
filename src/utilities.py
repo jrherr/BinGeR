@@ -177,7 +177,7 @@ def extractReadsForBins(projInfo, options):
 			os.mkdir(binPath)
 	
 	if not options.quiet:
-		sys.stdout.write('Now outputting contigs for each core...\n')
+		sys.stdout.write('Now outputting reads for each core...\n')
 	
 	# dynamic file handle dict
 	numFileHandles = 2 * len(projInfo.samples) * len(cores)
@@ -227,7 +227,9 @@ def extractReadsForBins(projInfo, options):
 			if contigID not in contigIDs:
 				continue
 			coreID = contigIDs[contigID]
-			readIDs = samfh.fetch(contigID)
+			readIDs = []
+			for read in samfh.fetch(contigID):
+				readIDs.append(read.qname)
 			PEs, SEs = categorizeReads(readIDs)
 			for x in PEs: PEReadLookup[x] = coreID
 			for x in SEs: SEReadLookup[x] = coreID
