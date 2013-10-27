@@ -33,6 +33,7 @@ import glob
 import cPickle
 import shutil
 import resource
+from os.path import realpath
 from operator import itemgetter
 
 import pysam
@@ -213,7 +214,7 @@ def extractReadsForBins(projInfo, options):
 		bamFile = projInfo.getBamFile(sample)
 		
 		try:
-			samfh = pysam.Samfile(os.realpath(bamFile), 'rb')
+			samfh = pysam.Samfile(realpath(bamFile), 'rb')
 		except IOError:
 			sys.stderr.write('Failure in opening:\n\t%s\n' % bamFile)
 			continue
