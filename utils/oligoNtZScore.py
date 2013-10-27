@@ -191,7 +191,7 @@ def main(argv = sys.argv[1:]):
 		ifh = open(options.infile, 'w')
 		
 		i = 0
-		for record in SeqIO.parser(ifh, 'fasta'):
+		for record in SeqIO.parse(ifh, 'fasta'):
 			i += 1
 			index = i % options.num_proc
 			tfhs.write('>%s\n%s\n' % (record.id, record.seq))
