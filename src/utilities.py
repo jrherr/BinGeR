@@ -239,15 +239,15 @@ def extractReadsForBins(projInfo, options):
 			for read in samfh.fetch(contigID):
 				if read.is_secondary:
 					continue
-				readIDs.append(read.qname)
+				readIDs.append((read.qname, read.seq))
 			
 			PEs, SEs = categorizeReads(readIDs)
-			for x in PEs: PEReadLookup[x] = coreID
-			for x in SEs: SEReadLookup[x] = coreID
+			
 			print PEs[:4]
 		
 		samfh.close()
 		print 'Finsihed reading the samfile'
+		continue 
 		
 		readFile = projInfo.getReadFile(sample)
 		rfh = open(readFile, 'r')
@@ -322,16 +322,21 @@ def categorizeReads(readIDs):
 	PEs = []
 	SEs = []
 	occurrences = {}
-	for readID in readIDs:
+	for readID, readSeq in readIDs:
 		if readID[:-1] not in occurrences:
 			occurrences[readID[:-1]] = []
-		occurrences[readID[:-1]].append(readID)
+		occurrences[readID[:-1]].append((readID, readSeq))
 	
 	for readID in occurrences:
 		if len(occurrences[readID]) == 1:
 			SEs += occurrences[readID]
 		else:
-			PEs += occurrences[readID]
+			r1, r2 = occurrences[readID]
+			if r1[0][-1] == '2':
+				PEs += [r2, r1]
+			else:
+				PEs += [r1, r2]
+
 	return PEs, SEs
 # End of categorizeReads
 
