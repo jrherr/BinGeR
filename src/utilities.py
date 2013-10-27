@@ -243,76 +243,73 @@ def extractReadsForBins(projInfo, options):
 			
 			PEs, SEs = categorizeReads(readIDs)
 			
-			print PEs[:4]
-		
-		samfh.close()
-		print 'Finsihed reading the samfile'
-		continue 
-		
-		readFile = projInfo.getReadFile(sample)
-		rfh = open(readFile, 'r')
-		while 1:
-			tag = rfh.readline().rstrip('\n')
-			if not tag:
-				break
-			tag = tag.replace('>', '')
-			seq = rfh.readline().rstrip('\n')
-			
-			if tag not in PEReadLookup and tag not in SEReadLookup:
-				continue
-			elif tag in PEReadLookup:
-				coreID = PEReadLookup[tag]
+			# write to PE file
+			if len(PEs) > 0:
 				j = coreIDs.index(coreID)
 				ofhIndex = 2 * (j + (i * len(projInfo.samples)))
-			elif tag in SEReadLookup:
-				coreID = SEReadLookup[tag]
-				j = coreIDs.index(coreID)
-				ofhIndex = 1+ 2 * (j + (i * len(projInfo.samples)))
-			
-			if ofhs[ofhIndex] == None:
-				if ofhIndex % 2 == 0:
+				if ofhs[ofhIndex] == None:
 					readFile = binReadPath + '/'+ coreID + '/' + sample + '.PE.fa'
-				else:
-					readFile = binReadPath + '/'+ coreID + '/' + sample + '.SE.fa'
 				
-				# choose an active one to close
-				fhSuc = 0
-				for index in range(ofhIndex+2, len(ofhs), 2):
-					if ofhs[index] != None:
-						ofhs[index].close()
-						ofhs[index] = None
-						fhSuc = 1
-						break
-				if fhSuc == 0:
-					if ofhIndex % 2 == 0:
-						startIndex = 0
-					else:
-						startIndex = 1
-					for index in range(startIndex, ofhIndex, 2):
+					fhSuc = 0
+					for index in range(ofhIndex+2, len(ofhs), 2):
 						if ofhs[index] != None:
 							ofhs[index].close()
 							ofhs[index] = None
 							fhSuc = 1
 							break
-				# and then open the one we need
-				ofhs[ofhIndex] = open(readFile, 'a')
-				
-			else:
-				ofhs[ofhIndex].write('>%s\n%s\n' % (tag, seq))
-		
-		rfh.close()
-		
-		if not options.quiet:
-			sys.stdout.flush()
+					if fhSuc == 0:
+						startIndex = 0
+						for index in range(startIndex, ofhIndex, 2):
+							if ofhs[index] != None:
+								ofhs[index].close()
+								ofhs[index] = None
+								fhSuc = 1
+								break
+								
+					# and then open the one we need
+					ofhs[ofhIndex] = open(readFile, 'a')
+				# write to PE file
+				for PE in PEs:
+					ofhs[ofhIndex].write('>%s\n%s\n'%(PE[0], PE[1]))
 			
+			# then write to SE file
+			if len(SEs) > 0:
+				j = coreIDs.index(coreID)
+				ofhIndex = 1 + 2 * (j + (i * len(projInfo.samples)))
+				if ofhs[ofhIndex] == None:
+					readFile = binReadPath + '/'+ coreID + '/' + sample + '.PE.fa'
+				
+					fhSuc = 0
+					for index in range(ofhIndex+2, len(ofhs), 2):
+						if ofhs[index] != None:
+							ofhs[index].close()
+							ofhs[index] = None
+							fhSuc = 1
+							break
+					if fhSuc == 0:
+						startIndex = 1
+						for index in range(startIndex, ofhIndex, 2):
+							if ofhs[index] != None:
+								ofhs[index].close()
+								ofhs[index] = None
+								fhSuc = 1
+								break
+								
+					# and then open the one we need
+					ofhs[ofhIndex] = open(readFile, 'a')
+				
+				# write to PE file
+				for SE in SEs:
+					ofhs[ofhIndex].write('>%s\n%s\n'%(SE[0], SE[1]))
+		sys.stdout.flush()
+		samfh.close()
+		
 	# close up all filehandles
 	for ofh in ofhs:
 		if ofh == None:
 			continue	
 		ofh.close()
 		
-	sys.stdout.flush()
-	
 	if not options.quiet:
 		sys.stdout.write('Done. Reads stored at:\n %s\n' % binReadPath)
 	
@@ -337,7 +334,7 @@ def categorizeReads(readIDs):
 			else:
 				PEs += [r1, r2]
 		else:
-			print occurrences[readID]
+			pass
 
 	return PEs, SEs
 # End of categorizeReads
