@@ -136,6 +136,8 @@ def main(argv = sys.argv[1:]):
 	covFiles = []
 	for sampleA in samples:
 		for sampleB in samples:
+			if sampleA != sampleB:
+				continue
 			files = glob.glob(options.bams_dir + '/' + sampleA + '.vs.' + sampleB + '.*.bam')
 			if len(files) != 1:
 				sys.stderr.write('FATAL: error in locating bam file for : %s vs %s\n' \

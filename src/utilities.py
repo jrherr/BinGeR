@@ -97,7 +97,7 @@ def outputBins(projInfo, options):
 	for i, sample in enumerate(projInfo.samples):
 		if not options.quiet:
 			sys.stdout.flush()
-			sys.stdout.write('Now working on sample: %s\r' % sample)
+			sys.stdout.write('Finished sample: %s\r' % sample)
 		
 		contigIDs[sample] = []
 		assemblyFile = projInfo.getAssemblyFile(sample)
@@ -231,7 +231,7 @@ def extractReadsForBins(projInfo, options):
 		
 		if not options.quiet:
 			sys.stdout.flush()
-			sys.stdout.write('Working on sample: %s\r' % sample)
+			sys.stdout.write('Finished sample: %s\r' % sample)
 			
 		bamFile = projInfo.getBamFile(sample)
 		
