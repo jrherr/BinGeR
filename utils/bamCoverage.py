@@ -99,7 +99,7 @@ def main(argv = sys.argv[1:]):
 							help = "Directory where coverage files are, naming follows \"sampleA.vs.sampleB.*.coverage\" convention. [Default: ./Coverage]")
 
 	optOptions.add_option("-t", "--num_proc", type = "int", default = 1, metavar = 'INT',
-							help = "Number of processor for BinGeR to use [default: 1].")
+							help = "Number of processors to use [default: 1].")
 						
 
 	parser.add_option_group(optOptions)
@@ -157,7 +157,7 @@ def main(argv = sys.argv[1:]):
 	
 		
 	CMDs = [[bamfile, covfile] for bamfile, covfile in zip(bamFiles, covFiles)]
-	sys.stdout.write('Starting calculating the coverage...\n')
+	sys.stdout.write('Calculating the coverage...\n')
 	pool = mp.Pool(options.num_proc)
 	pool.map_async(coverageCal, CMDs)
 	pool.close()

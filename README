@@ -45,7 +45,7 @@ $ python setup.py install --prefix = user/defined/installation/directory
 
 If you have everything ready, this should take care of the installation.
 
-[How to run]
+[How to run BinGeR]
 ==========================
 After running setup.py, you may want to either open a new tab in the terminal, or in current terminal tab:
 $ source ~/.profile
@@ -60,6 +60,10 @@ $ BinGeR.py --help
 This should print out a detailed settings for you.
 
 Note: to start with a project, you will need to use the scripts in the utils directory to produce the files first
+
+[How to construct a project]
+===============================
+
 
 [Contents of db folder]
 ==========================
@@ -77,7 +81,6 @@ bamCoverage.py
 oligoNtZScore.py
 runHMMScan.py
 interleaveReads.py
-renameContigs.py
 
 They are utility scripts that will assist you in preparing the input files necessary for BinGeR.
 
