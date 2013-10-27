@@ -240,7 +240,7 @@ def extractReadsForBins(projInfo, options):
 				readIDs.append(read.qname)
 			
 			PEs, SEs = categorizeReads(readIDs)
-			
+			print PEs
 			for x in PEs: PEReadLookup[x] = coreID
 			for x in SEs: SEReadLookup[x] = coreID
 		
