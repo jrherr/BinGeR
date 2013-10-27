@@ -32,6 +32,10 @@ python bamCoverage.py --help
 
 USAGE = \
 """Usage: %prog <required_parameters> [options]
+
+for more information, run:
+python bamCoverage.py --help
+
 bamCoverage.py is a utility script that helps prepare the coverage files used in BinGeR
 It is part of the BinGeR package under GNU 3 license. You are free to use and 
 re-distribute it with the condition of keeping the script intact.
@@ -111,7 +115,7 @@ def main(argv = sys.argv[1:]):
 		exit(0)
 		
 	if options.bams_dir is None:
-		parser.error("An BAM file directory is required to supply!")
+		parser.error("A BAM file directory is required to supply!")
 		exit(0)
 	
 	if options.num_proc < 1:

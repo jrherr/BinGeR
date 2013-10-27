@@ -32,7 +32,11 @@ python oligoNtZScore.py --help
 
 USAGE = \
 """Usage: %prog <required_parameters> [options]
-bamCoverage.py is a utility script that helps prepare the coverage files used in BinGeR
+
+for more information, run:
+python oligoNtZScore.py --help
+
+oligoNtZScore.py is a utility script that helps prepare the ZScore files used in BinGeR
 It is part of the BinGeR package under GNU 3 license. You are free to use and 
 re-distribute it with the condition of keeping the script intact.
 
@@ -53,6 +57,7 @@ from Bio import SeqIO
 import numpy as np
 import scipy.stats
 import string
+from time import time
 
 def reverseComp(seq):
 	seq=seq[-1::-1]
@@ -166,6 +171,10 @@ def main(argv = sys.argv[1:]):
 	
 	(options, args) = parser.parse_args(argv)
 	
+	if options.infile is None:
+		parser.error("An infile in fastA format is required!")
+		exit(0)
+		
 	if not os.path.exists(options.infile):
 		parser.error("Cannot find the infile you supplied: %s" % options.infile)
 		exit(0)
@@ -181,10 +190,11 @@ def main(argv = sys.argv[1:]):
 		tfhs = []
 		infiles = []
 		outfiles = []
+		temp = str(time())
 		for i in range(options.num_proc):
-			tempfile = 'temp.fa.' + str(i+1)
+			tempfile = temp + '.fa.' + str(i+1)
 			infiles.append(tempfile)
-			outfiles.append('temp.zscore.'+str(i+1))
+			outfiles.append(temp+'.zscore.'+str(i+1))
 			tfh = open(tempfile, 'w')
 			tfhs.append(tfh)
 		
@@ -194,7 +204,7 @@ def main(argv = sys.argv[1:]):
 		for record in SeqIO.parse(ifh, 'fasta'):
 			i += 1
 			index = i % options.num_proc
-			tfhs.write('>%s\n%s\n' % (record.id, record.seq))
+			tfhs[index].write('>%s\n%s\n' % (record.id, record.seq))
 			
 		ifh.close()
 		for tfh in tfhs:
@@ -219,7 +229,7 @@ def main(argv = sys.argv[1:]):
 			os.remove(outfile)
 	return
 	
-#End of main
+# End of main
 	
 if __name__ == '__main__':
 	main()
