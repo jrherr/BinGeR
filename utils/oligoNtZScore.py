@@ -132,7 +132,7 @@ def oligoStat(x):
 			out.append(str(f))
 		tetraZLine="\t".join(out)
 	
-		ofh.write(tag+'\n'+triZLine+'\n'+tetraZLine+'\n')
+		ofh.write(triZLine+'\n'+tetraZLine+'\n')
 	ifh.close()
 	ofh.close()
 	
@@ -188,7 +188,7 @@ def main(argv = sys.argv[1:]):
 			tfh = open(tempfile, 'w')
 			tfhs.append(tfh)
 		
-		ifh = open(options.infile, 'w')
+		ifh = open(options.infile, 'r')
 		
 		i = 0
 		for record in SeqIO.parse(ifh, 'fasta'):
