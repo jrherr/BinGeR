@@ -211,7 +211,11 @@ def extractReadsForBins(projInfo, options):
 			sys.stdout.write('[%s]\r' % sample)
 			
 		bamFile = projInfo.getBamFile(sample)
-		samfh = pysam.Samfile(bamFile, 'rb')
+		try:
+			samfh = pysam.Samfile(bamFile, 'rb')
+		except IOError:
+			sys.stderr.write('Failure in opening %s\n' % bamFile)
+			continue
 		contigs = samfh.references()
 		PEReadLookup = {}
 		SEReadLookup = {}
@@ -245,7 +249,6 @@ def extractReadsForBins(projInfo, options):
 				j = coreIDs.index(coreID)
 				ofhIndex = 1+ 2 * (j + (i * len(projInfo.samples)))
 			
-			############### CONSTRUCTION SITE #############
 			if ofhs[ofhIndex] == None:
 				if ofhIndex % 2 == 0:
 					readFile = binReadPath + '/'+ coreID + '/' + sample + '.PE.fa'

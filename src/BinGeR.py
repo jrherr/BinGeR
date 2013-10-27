@@ -39,7 +39,7 @@ BinGeR (Binner for Genome Recovery) is a platform for de novo genome recovery
 from series metagenomes. It integrates information from single copy gene content, 
 contig coverage correlation, and contig oligo-nucleotide composition correlation, 
 and contig alignments to bin genome fragments together. 
-It is written in Python, therefore it should run on Windows, Mac OS, and Unix/Linux. 
+It is written in Python, therefore it should run on Mac OS, and Unix/Linux. 
 
 Add --help to see a full list of required and optional
 arguments to run BinGeR.
