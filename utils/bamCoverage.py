@@ -56,7 +56,7 @@ def coverageCal(x):
 	bamFile, outfile = x
 	samfh = pysam.Samfile(bamFile, 'rb')
 	ofh = open(outfile, 'w')
-	ofh.write('# Based on %s\n#ContigID\tContigLength\tNum_of_mapping_reads\tCoverage\n' % os.paht.abspath(bamFile))
+	ofh.write('# Based on %s\n#ContigID\tContigLength\tNum_of_mapping_reads\tCoverage\n' % os.path.abspath(bamFile))
 	
 	for contigID, contigLength in zip(samfh.references, samfh.lengths):
 		numberReads = 0
