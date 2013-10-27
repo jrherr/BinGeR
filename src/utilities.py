@@ -33,7 +33,6 @@ import glob
 import cPickle
 import shutil
 import resource
-from os.path import realpath
 from operator import itemgetter
 
 import pysam
@@ -142,6 +141,13 @@ def outputBins(projInfo, options):
 		
 		ufh.close()
 		afh.close()
+	
+	
+	# cleanup empty files
+	for coreID in coreIDs:
+		for file in glob.glob(binContigPath + '/' + coreID + '/*.fa'):
+			if os.stat(file).st_size == 0:
+				os.remove(file)
 	
 	# close up all filehandles
 	for ofh in ofhs:
@@ -310,6 +316,12 @@ def extractReadsForBins(projInfo, options):
 			continue	
 		ofh.close()
 		
+	# cleanup empty files
+	for coreID in coreIDs:
+		for file in glob.glob(binReadPath + '/' + coreID + '/*.fa'):
+			if os.stat(file).st_size == 0:
+				os.remove(file)
+	
 	if not options.quiet:
 		sys.stdout.write('Done. Reads stored at:\n %s\n' % binReadPath)
 	
