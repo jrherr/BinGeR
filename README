@@ -19,6 +19,8 @@ Dependencies:
 
 Python >= 2.6
 BLAT 
+prodigal
+hmmscan
 
 Python libraries:
 
@@ -45,6 +47,28 @@ $ python setup.py install --prefix = user/defined/installation/directory
 
 If you have everything ready, this should take care of the installation.
 
+[How to start a BinGeR project]
+==================================
+Here is what you need to get started:
+
+1, a text file listing the sample names, one per line;
+
+2, pre-contigs for each sample in fasta format. By pre-contigs, I mean assemblies you manage to get from standard assemblers such as Velvet, SOAPdenovo, etc. By default, these files are stored at 'Assemblies/', otherwise when running BinGeR, you'll need to use -a/--assemblies_dir to specify where they are;
+
+3, all-vs-all reads mapping to these pre-contigs in BAM format, sorted and indexed. For instance, if you have 4 samples, you will need 4x4 BAM files. If you are not familiar with how to generate BAM files, refer to Samtools page: http://samtools.sourceforge.net.
+
+With all these, you need to do the following using the scripts in the 'utils' directory (they are easy to be run in a distributed manner, so if you have access to a cluster, this will save you time):
+
+1, generate coverage files using utils/bamCoverage.py; by default they are saved in the 'Coverage/' directory;
+
+2, generate 3-mer and 4-mer stats using utils/oligoNtZScore.py; by default they are saved in the 'ZScores/' directory;
+
+3, generate hmmscan files using utils/runHMMScan.py; by default they are saved in the 'HMMScan/' directory;
+
+4, save all the 'on-diagonal' BAM files into a folder (.bam and .bai), which by default is 'Bams/', however, you can always specify the location of the folder when running BinGeR otherwise. (you don't need the "off-diagonal" BAM files from now on). By "on-diagonal" I mean self-vs-self mappings, for example 'sampleA.vs.sampleA.sorted.bam'.
+
+Now you are ready to run BinGeR.py
+
 [How to run BinGeR]
 ==========================
 After running setup.py, you may want to either open a new tab in the terminal, or in current terminal tab:
@@ -60,9 +84,6 @@ $ BinGeR.py --help
 This should print out a detailed settings for you.
 
 Note: to start with a project, you will need to use the scripts in the utils directory to produce the files first
-
-[How to construct a project]
-===============================
 
 
 [Contents of db folder]
@@ -80,10 +101,11 @@ In utils/, you will see a few Python scripts, as listed below:
 bamCoverage.py
 oligoNtZScore.py
 runHMMScan.py
-interleaveReads.py
 
 They are utility scripts that will assist you in preparing the input files necessary for BinGeR.
 
 For detailed usage of each utils script, please run:
 
-$ utils/script --help
+$ python utils/script.py --help
+
+There is also an hmm file, "SingleCopyGenes.HMM", which is used as the database for runHMMScan.py
