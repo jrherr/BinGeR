@@ -214,9 +214,9 @@ def extractReadsForBins(projInfo, options):
 		try:
 			samfh = pysam.Samfile(bamFile, 'rb')
 		except IOError:
-			sys.stderr.write('Failure in opening %s\n' % bamFile)
+			sys.stderr.write('Failure in opening:\n\t%s\n' % bamFile)
 			continue
-		contigs = samfh.references()
+		contigs = samfh.references
 		PEReadLookup = {}
 		SEReadLookup = {}
 		for contigID in contigs:
@@ -289,7 +289,7 @@ def extractReadsForBins(projInfo, options):
 		
 	sys.stdout.flush()
 	if not options.quiet:
-		sys.stdout.write('Done. Contigs stored at:\n %s\n' % binContigPath)
+		sys.stdout.write('Done. Reads stored at:\n %s\n' % binReadPath)
 	
 # End of extractReadsForBins
 
