@@ -293,6 +293,7 @@ def extractReadsForBins(projInfo, options):
 							break
 				# and then open the one we need
 				ofhs[ofhIndex] = open(readFile, 'a')
+				
 			else:
 				ofhs[ofhIndex].write('>%s\n%s\n' % (tag, seq))
 		
