@@ -224,6 +224,7 @@ def extractReadsForBins(projInfo, options):
 		PEReadLookup = {}
 		SEReadLookup = {}
 		for contigID in contigs:
+			print contigID
 			if contigID not in contigIDs:
 				continue
 			coreID = contigIDs[contigID]
