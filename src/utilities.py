@@ -89,7 +89,7 @@ def outputBins(projInfo, options):
 		for j, coreID in enumerate(coreIDs):
 			ofhIndex = j + (i * len(projInfo.samples))
 			binContigFile = binContigPath + '/'+ coreID + '/' + sample + '.contigs.fa'
-			if activeFileHandles < NOFILE_LIMIT - 4:
+			if activeFileHandles < NOFILE_LIMIT - len(projInfo.samples) - 4:
 				ofhs[ofhIndex] = open(binContigFile, 'a')
 				activeFileHandles += 1
 			else:
@@ -102,8 +102,12 @@ def outputBins(projInfo, options):
 		contigIDs[sample] = []
 		assemblyFile = projInfo.getAssemblyFile(sample)
 		afh = open(assemblyFile, 'r')
+		unclassifiedContigs = binContigPath + '/' + sample + '.unclassified.contigs.fa'
+		ufh = open(unclassifiedContigs, 'w')
+		
 		for record in SeqIO.parse(afh, "fasta"):
 			if record.id not in contigIDs:
+				ufh.write('>%s\n%s\n'%(record.id, record.seq))
 				continue
 			coreID = contigIDs[record.id]
 			j = coreIDs.index(coreID)
@@ -136,6 +140,7 @@ def outputBins(projInfo, options):
 			
 			ofhs[ofhIndex].write('>%s\n%s\n'%(record.id, record.seq))
 		
+		ufh.close()
 		afh.close()
 	
 	# close up all filehandles
@@ -228,13 +233,13 @@ def extractReadsForBins(projInfo, options):
 		PEReadLookup = {}
 		SEReadLookup = {}
 		for contigID in contigs:
-			print contigID
 			if contigID not in contigIDs:
 				continue
 			coreID = contigIDs[contigID]
 			readIDs = []
 			for read in samfh.fetch(contigID):
 				readIDs.append(read.qname)
+			print contigID, len(readIDs), readIDs[0]
 			PEs, SEs = categorizeReads(readIDs)
 			print PEs
 			print SEs
