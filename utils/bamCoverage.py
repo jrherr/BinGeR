@@ -78,6 +78,10 @@ def main(argv = sys.argv[1:]):
 	parser = OptionParser(usage = USAGE, version="Version: " + __version__)
 	
 	# Required arguments
+	
+	requiredOptions = OptionGroup(parser, "Required options",
+								"These options are required to run BinGeR, and may be supplied in any order.")
+	
 	requiredOptions.add_option("-l", "--sample_list", type = "string", metavar = "FILE",
 							help = "Text file containing all sample names, one per line")
 
