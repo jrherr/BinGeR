@@ -1,6 +1,8 @@
 BinGeR 
 version: 0.0.1
 author: Chengwei Luo
+
+BinGeR: in-situ Genome recovery tool for series metagenomes
 ==========================
 
 BinGeR: in-situ Genome recovery tool for series metagenomes
