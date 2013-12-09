@@ -164,10 +164,10 @@ class ProjectInfo:
 		if len(coverageFiles) == 0:
 			coverageFiles = glob.glob(self.coverage_dir+'/'+sampleA+'[.]vs[.]'+sampleB+'[.]coverage')
 		if len(coverageFiles) == 0:
-			sys.stderr.write("FATAL: fail to locate coverage file for %s vs %s\n"%sampleA, sampleB)
+			sys.stderr.write("FATAL: fail to locate coverage file for %s vs %s\n"%(sampleA, sampleB))
 			exit(0)
 		elif len(coverageFiles) > 1:
-			sys.stderr.write("FATAL: ambiguity in locating coverage file for %s vs %s\n"%sampleA, sampleB)
+			sys.stderr.write("FATAL: ambiguity in locating coverage file for %s vs %s\n"%(sampleA, sampleB))
 			sys.stderr.write("\tBinGeR found:\n")
 			for coverageFile in coverageFiles:
 				sys.stderr.write("\t%s\n"%coverageFile)
