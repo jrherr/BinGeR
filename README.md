@@ -13,7 +13,7 @@ Reference: [manuscript in preparation]
 
 Copyright: Chengwei Luo, Konstantinidis Lab, Georgia Institute of Technology, 2013
 
-Contact: Chengwei Luo (Email: luo.chengwei@gatech.edu)
+Contact: Chengwei Luo (Email: luo.chengwei@gatech.edu; cluo@broadinstitute.org)
 
 [How to install]
 ==========================
